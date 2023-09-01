@@ -156,6 +156,7 @@ int NetPrivate::upload_model()
             int uret = layers[i]->upload_model(cmd, get_masked_option(opt_upload, layers[i]->featmask));
             if (uret != 0)
             {
+                g_error = true;
                 NCNN_LOGE("layer upload_model %d failed", (int)i);
                 return -1;
             }
@@ -1290,6 +1291,7 @@ int Net::load_param(const DataReader& dr)
 #define SCAN_VALUE(fmt, v)                \
     if (dr.scan(fmt, &v) != 1)            \
     {                                     \
+        g_error = true;                   \
         NCNN_LOGE("parse " #v " failed"); \
         return -1;                        \
     }
@@ -1298,6 +1300,7 @@ int Net::load_param(const DataReader& dr)
     SCAN_VALUE("%d", magic)
     if (magic != 7767517)
     {
+        g_error = true;
         NCNN_LOGE("param is too old, please regenerate");
         return -1;
     }
@@ -1309,6 +1312,7 @@ int Net::load_param(const DataReader& dr)
     SCAN_VALUE("%d", blob_count)
     if (layer_count <= 0 || blob_count <= 0)
     {
+        g_error = true;
         NCNN_LOGE("invalid layer_count or blob_count");
         return -1;
     }
@@ -1376,6 +1380,7 @@ int Net::load_param(const DataReader& dr)
         }
         if (!layer)
         {
+            g_error = true;
             NCNN_LOGE("layer %s not exists or registered", layer_type);
             clear();
             return -1;
@@ -1439,6 +1444,7 @@ int Net::load_param(const DataReader& dr)
         int pdlr = pd.load_param(dr);
         if (pdlr != 0)
         {
+            g_error = true;
             NCNN_LOGE("ParamDict load_param %d %s failed", i, layer->name.c_str());
             continue;
         }
@@ -1495,6 +1501,7 @@ int Net::load_param(const DataReader& dr)
         int lr = layer->load_param(pd);
         if (lr != 0)
         {
+            g_error = true;
             NCNN_LOGE("layer load_param %d %s failed", i, layer->name.c_str());
             continue;
         }
@@ -1515,6 +1522,7 @@ int Net::load_param_bin(const DataReader& dr)
 #define READ_VALUE(buf)                            \
     if (dr.read(&buf, sizeof(buf)) != sizeof(buf)) \
     {                                              \
+        g_error = true;                            \
         NCNN_LOGE("read " #buf " failed");         \
         return -1;                                 \
     }
@@ -1523,6 +1531,7 @@ int Net::load_param_bin(const DataReader& dr)
     READ_VALUE(magic)
     if (magic != 7767517)
     {
+        g_error = true;
         NCNN_LOGE("param is too old, please regenerate");
         return -1;
     }
@@ -1533,6 +1542,7 @@ int Net::load_param_bin(const DataReader& dr)
     READ_VALUE(blob_count)
     if (layer_count <= 0 || blob_count <= 0)
     {
+        g_error = true;
         NCNN_LOGE("invalid layer_count or blob_count");
         return -1;
     }
@@ -1598,6 +1608,7 @@ int Net::load_param_bin(const DataReader& dr)
         }
         if (!layer)
         {
+            g_error = true;
             NCNN_LOGE("layer %d not exists or registered", typeindex);
             clear();
             return -1;
@@ -1645,6 +1656,7 @@ int Net::load_param_bin(const DataReader& dr)
         int pdlr = pd.load_param_bin(dr);
         if (pdlr != 0)
         {
+            g_error = true;
 #if NCNN_STRING
             NCNN_LOGE("ParamDict load_param %d %s failed", i, layer->name.c_str());
 #else
@@ -1705,6 +1717,7 @@ int Net::load_param_bin(const DataReader& dr)
         int lr = layer->load_param(pd);
         if (lr != 0)
         {
+            g_error = true;
 #if NCNN_STRING
             NCNN_LOGE("layer load_param %d %s failed", i, layer->name.c_str());
 #else
@@ -1726,6 +1739,7 @@ int Net::load_model(const DataReader& dr)
 {
     if (d->layers.empty())
     {
+        g_error = true;
         NCNN_LOGE("network graph not ready");
         return -1;
     }
@@ -1743,6 +1757,7 @@ int Net::load_model(const DataReader& dr)
         //Here we found inconsistent content in the parameter file.
         if (!layer)
         {
+            g_error = true;
             NCNN_LOGE("load_model error at layer %d, parameter file has inconsistent content.", i);
             ret = -1;
             break;
@@ -1751,6 +1766,7 @@ int Net::load_model(const DataReader& dr)
         int lret = layer->load_model(mb);
         if (lret != 0)
         {
+            g_error = true;
 #if NCNN_STRING
             NCNN_LOGE("layer load_model %d %s failed", i, layer->name.c_str());
 #else
@@ -1799,6 +1815,7 @@ int Net::load_model(const DataReader& dr)
         int cret = layer->create_pipeline(opt1);
         if (cret != 0)
         {
+            g_error = true;
 #if NCNN_STRING
             NCNN_LOGE("layer create_pipeline %d %s failed", i, layer->name.c_str());
 #else
@@ -1859,6 +1876,7 @@ int Net::load_param(const char* protopath)
     FILE* fp = fopen(protopath, "rb");
     if (!fp)
     {
+        g_error = true;
         NCNN_LOGE("fopen %s failed", protopath);
         return -1;
     }
@@ -1880,6 +1898,7 @@ int Net::load_param_bin(const char* protopath)
     FILE* fp = fopen(protopath, "rb");
     if (!fp)
     {
+        g_error = true;
         NCNN_LOGE("fopen %s failed", protopath);
         return -1;
     }
@@ -1900,6 +1919,7 @@ int Net::load_model(const char* modelpath)
     FILE* fp = fopen(modelpath, "rb");
     if (!fp)
     {
+        g_error = true;
         NCNN_LOGE("fopen %s failed", modelpath);
         return -1;
     }
@@ -1940,6 +1960,7 @@ int Net::load_param(AAssetManager* mgr, const char* assetpath)
     AAsset* asset = AAssetManager_open(mgr, assetpath, AASSET_MODE_BUFFER);
     if (!asset)
     {
+        g_error = true;
         NCNN_LOGE("AAssetManager_open %s failed", assetpath);
         return -1;
     }
@@ -1961,6 +1982,7 @@ int Net::load_param_bin(AAssetManager* mgr, const char* assetpath)
     AAsset* asset = AAssetManager_open(mgr, assetpath, AASSET_MODE_BUFFER);
     if (!asset)
     {
+        g_error = true;
         NCNN_LOGE("AAssetManager_open %s failed", assetpath);
         return -1;
     }
@@ -1981,6 +2003,7 @@ int Net::load_model(AAssetManager* mgr, const char* assetpath)
     AAsset* asset = AAssetManager_open(mgr, assetpath, AASSET_MODE_STREAMING);
     if (!asset)
     {
+        g_error = true;
         NCNN_LOGE("AAssetManager_open %s failed", assetpath);
         return -1;
     }
@@ -2010,6 +2033,7 @@ void Net::clear()
         int dret = layer->destroy_pipeline(opt1);
         if (dret != 0)
         {
+            g_error = true;
             NCNN_LOGE("layer destroy_pipeline failed");
             // ignore anyway
         }
@@ -2159,6 +2183,7 @@ int Net::find_blob_index_by_name(const char* name) const
         }
     }
 
+    g_error = true;
     NCNN_LOGE("find_blob_index_by_name %s failed", name);
     return -1;
 }
@@ -2174,6 +2199,7 @@ int Net::find_layer_index_by_name(const char* name) const
         }
     }
 
+    g_error = true;
     NCNN_LOGE("find_layer_index_by_name %s failed", name);
     return -1;
 }
@@ -2414,6 +2440,7 @@ int Extractor::input(const char* blob_name, const Mat& in)
             NCNN_LOGE("    ex.input(\"%s\", in%d);", input_names[i], (int)i);
         }
 
+        g_error = true;
         return -1;
     }
 
@@ -2432,6 +2459,7 @@ int Extractor::extract(const char* blob_name, Mat& feat, int type)
             NCNN_LOGE("    ex.extract(\"%s\", out%d);", output_names[i], (int)i);
         }
 
+        g_error = true;
         return -1;
     }
 
@@ -2639,6 +2667,7 @@ int Extractor::input(const char* blob_name, const VkMat& in)
             NCNN_LOGE("    ex.input(\"%s\", in%d);", input_names[i], (int)i);
         }
 
+        g_error = true;
         return -1;
     }
 
@@ -2657,6 +2686,7 @@ int Extractor::extract(const char* blob_name, VkMat& feat, VkCompute& cmd)
             NCNN_LOGE("    ex.extract(\"%s\", out%d);", output_names[i], (int)i);
         }
 
+        g_error = true;
         return -1;
     }
 
@@ -2675,6 +2705,7 @@ int Extractor::input(const char* blob_name, const VkImageMat& in)
             NCNN_LOGE("    ex.input(\"%s\", in%d);", input_names[i], (int)i);
         }
 
+        g_error = true;
         return -1;
     }
 
@@ -2693,6 +2724,7 @@ int Extractor::extract(const char* blob_name, VkImageMat& feat, VkCompute& cmd)
             NCNN_LOGE("    ex.extract(\"%s\", out%d);", output_names[i], (int)i);
         }
 
+        g_error = true;
         return -1;
     }
 
@@ -2796,6 +2828,7 @@ int Extractor::extract(int blob_index, VkImageMat& feat, VkCompute& cmd)
 
     if (feat.empty())
     {
+        g_error = true;
         NCNN_LOGE("extract %d image allocation failed", blob_index);
         ret = -100;
     }

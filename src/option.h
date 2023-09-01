@@ -19,6 +19,9 @@
 
 namespace ncnn {
 
+#define NCNN_HAVE_GERROR_FLAG
+extern bool g_error;
+
 #if NCNN_VULKAN
 class VkAllocator;
 class PipelineCache;

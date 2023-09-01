@@ -273,6 +273,7 @@ int PipelineCache::get_pipeline(const uint32_t* spv_data, size_t spv_data_size, 
     ret = resolve_shader_info(spv_data, spv_data_size, shader_info);
     if (ret != 0)
     {
+        g_error = true;
         NCNN_LOGE("resolve_shader_info failed %d", ret);
         return -1;
     }
@@ -280,6 +281,7 @@ int PipelineCache::get_pipeline(const uint32_t* spv_data, size_t spv_data_size, 
     VkShaderModule shader_module = vkdev->compile_shader_module(spv_data, spv_data_size, local_size_x, local_size_y, local_size_z);
     if (!shader_module)
     {
+        g_error = true;
         NCNN_LOGE("create_shader_module failed");
         return -1;
     }
@@ -287,6 +289,7 @@ int PipelineCache::get_pipeline(const uint32_t* spv_data, size_t spv_data_size, 
     ret = new_pipeline(shader_module, shader_info, specializations, descriptorset_layout, pipeline_layout, pipeline, descriptor_update_template);
     if (ret != 0)
     {
+        g_error = true;
         NCNN_LOGE("new_pipeline failed");
         vkDestroyShaderModule(vkdev->vkdevice(), shader_module, 0);
         return -1;
@@ -358,6 +361,7 @@ int PipelineCache::get_pipeline(int shader_type_index, const Option& opt, const 
     ret = create_shader_module(shader_type_index, opt, local_size_x, local_size_y, local_size_z, &shader_module, shader_info);
     if (ret != 0)
     {
+        g_error = true;
         NCNN_LOGE("create_shader_module failed");
         return -1;
     }
@@ -365,6 +369,7 @@ int PipelineCache::get_pipeline(int shader_type_index, const Option& opt, const 
     ret = new_pipeline(shader_module, shader_info, specializations, descriptorset_layout, pipeline_layout, pipeline, descriptor_update_template);
     if (ret != 0)
     {
+        g_error = true;
         NCNN_LOGE("new_pipeline failed");
         vkDestroyShaderModule(vkdev->vkdevice(), shader_module, 0);
         return -1;
@@ -399,6 +404,7 @@ int PipelineCache::create_shader_module(int shader_type_index, const Option& opt
     int retc = compile_spirv_module(shader_type_index, opt, spirv);
     if (retc != 0)
     {
+        g_error = true;
         NCNN_LOGE("compile_spirv_module failed %d", retc);
         return -1;
     }
@@ -409,6 +415,7 @@ int PipelineCache::create_shader_module(int shader_type_index, const Option& opt
     int ret = resolve_shader_info(spv_data, spv_data_size, si);
     if (ret != 0)
     {
+        g_error = true;
         NCNN_LOGE("resolve_shader_info failed %d", ret);
         return -1;
     }
@@ -417,6 +424,7 @@ int PipelineCache::create_shader_module(int shader_type_index, const Option& opt
 
     if (!shader_module)
     {
+        g_error = true;
         NCNN_LOGE("create_shader_module failed");
         return -1;
     }
@@ -442,6 +450,7 @@ int PipelineCache::new_pipeline(VkShaderModule shader_module, const ShaderInfo& 
     // create new pipeline
     if ((int)specializations.size() != shader_info.specialization_count)
     {
+        g_error = true;
         NCNN_LOGE("pipeline specialization count mismatch, expect %d but got %d", shader_info.specialization_count, (int)specializations.size());
         goto ERROR_PipelineCache;
     }

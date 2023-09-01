@@ -1442,6 +1442,7 @@ void copy_cut_border(const Mat& src, Mat& dst, int top, int bottom, int left, in
 {
     if (left + right > src.w || top + bottom > src.h)
     {
+        g_error = true;
         NCNN_LOGE("copy_cut_border parameter error, top: %d, bottom: %d, left: %d, right: %d, src.w: %d, src.h: %d", top, bottom, left, right, src.w, src.h);
         return;
     }
@@ -1470,6 +1471,7 @@ void copy_cut_border_3d(const Mat& src, Mat& dst, int top, int bottom, int left,
 {
     if (left + right > src.w || top + bottom > src.h || front + behind > src.d)
     {
+        g_error = true;
         NCNN_LOGE("copy_cut_border_3d parameter error, top: %d, bottom: %d, left: %d, right: %d, front: %d, behind: %d, src.w: %d, src.h: %d, src.d: %d", top, bottom, left, right, front, behind, src.w, src.h, src.d);
         return;
     }

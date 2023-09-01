@@ -18,6 +18,8 @@
 
 namespace ncnn {
 
+bool g_error = false;
+
 Option::Option()
 {
     lightmode = true;

@@ -2454,6 +2454,7 @@ Mat Mat::from_pixels(const unsigned char* pixels, int type, int w, int h, Alloca
         return Mat::from_pixels(pixels, type, w, h, w * 4, allocator);
     }
 
+    g_error = true;
     // unknown convert type
     NCNN_LOGE("unknown convert type %d", type);
     return Mat();
@@ -2513,6 +2514,7 @@ Mat Mat::from_pixels(const unsigned char* pixels, int type, int w, int h, int st
             break;
         default:
             // unimplemented convert type
+            g_error = true;
             NCNN_LOGE("unimplemented convert type %d", type);
             break;
         }
@@ -2550,6 +2552,7 @@ Mat Mat::from_pixels_resize(const unsigned char* pixels, int type, int w, int h,
     }
 
     // unknown convert type
+    g_error = true;
     NCNN_LOGE("unknown convert type %d", type);
     return Mat();
 }
@@ -2584,6 +2587,7 @@ Mat Mat::from_pixels_resize(const unsigned char* pixels, int type, int w, int h,
     }
 
     // unknown convert type
+    g_error = true;
     NCNN_LOGE("unknown convert type %d", type);
     return Mat();
 }
@@ -2592,6 +2596,7 @@ Mat Mat::from_pixels_roi(const unsigned char* pixels, int type, int w, int h, in
 {
     if (roix < 0 || roiy < 0 || roiw <= 0 || roih <= 0 || roix + roiw > w || roiy + roih > h)
     {
+        g_error = true;
         NCNN_LOGE("roi %d %d %d %d out of image %d %d", roix, roiy, roiw, roih, w, h);
         return Mat();
     }
@@ -2612,6 +2617,7 @@ Mat Mat::from_pixels_roi(const unsigned char* pixels, int type, int w, int h, in
     }
 
     // unknown convert type
+    g_error = true;
     NCNN_LOGE("unknown convert type %d", type);
     return Mat();
 }
@@ -2620,6 +2626,7 @@ Mat Mat::from_pixels_roi(const unsigned char* pixels, int type, int w, int h, in
 {
     if (roix < 0 || roiy < 0 || roiw <= 0 || roih <= 0 || roix + roiw > w || roiy + roih > h)
     {
+        g_error = true;
         NCNN_LOGE("roi %d %d %d %d out of image %d %d", roix, roiy, roiw, roih, w, h);
         return Mat();
     }
@@ -2640,6 +2647,7 @@ Mat Mat::from_pixels_roi(const unsigned char* pixels, int type, int w, int h, in
     }
 
     // unknown convert type
+    g_error = true;
     NCNN_LOGE("unknown convert type %d", type);
     return Mat();
 }
@@ -2648,6 +2656,7 @@ Mat Mat::from_pixels_roi_resize(const unsigned char* pixels, int type, int w, in
 {
     if (roix < 0 || roiy < 0 || roiw <= 0 || roih <= 0 || roix + roiw > w || roiy + roih > h)
     {
+        g_error = true;
         NCNN_LOGE("roi %d %d %d %d out of image %d %d", roix, roiy, roiw, roih, w, h);
         return Mat();
     }
@@ -2668,6 +2677,7 @@ Mat Mat::from_pixels_roi_resize(const unsigned char* pixels, int type, int w, in
     }
 
     // unknown convert type
+    g_error = true;
     NCNN_LOGE("unknown convert type %d", type);
     return Mat();
 }
@@ -2676,6 +2686,7 @@ Mat Mat::from_pixels_roi_resize(const unsigned char* pixels, int type, int w, in
 {
     if (roix < 0 || roiy < 0 || roiw <= 0 || roih <= 0 || roix + roiw > w || roiy + roih > h)
     {
+        g_error = true;
         NCNN_LOGE("roi %d %d %d %d out of image %d %d", roix, roiy, roiw, roih, w, h);
         return Mat();
     }
@@ -2696,6 +2707,7 @@ Mat Mat::from_pixels_roi_resize(const unsigned char* pixels, int type, int w, in
     }
 
     // unknown convert type
+    g_error = true;
     NCNN_LOGE("unknown convert type %d", type);
     return Mat();
 }
@@ -2746,6 +2758,7 @@ void Mat::to_pixels(unsigned char* pixels, int type, int stride) const
             break;
         default:
             // unimplemented convert type
+            g_error = true;
             NCNN_LOGE("unimplemented convert type %d", type);
             break;
         }

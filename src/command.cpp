@@ -265,6 +265,7 @@ int VkComputePrivate::init()
         VkResult ret = vkCreateCommandPool(vkdev->vkdevice(), &commandPoolCreateInfo, 0, &compute_command_pool);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkCreateCommandPool failed %d", ret);
             return -1;
         }
@@ -282,6 +283,7 @@ int VkComputePrivate::init()
         VkResult ret = vkAllocateCommandBuffers(vkdev->vkdevice(), &commandBufferAllocateInfo, &compute_command_buffer);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkAllocateCommandBuffers failed %d", ret);
             return -1;
         }
@@ -297,6 +299,7 @@ int VkComputePrivate::init()
         VkResult ret = vkCreateFence(vkdev->vkdevice(), &fenceCreateInfo, 0, &compute_command_fence);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkCreateFence failed %d", ret);
             return -1;
         }
@@ -326,6 +329,7 @@ int VkComputePrivate::begin_command_buffer()
     VkResult ret = vkBeginCommandBuffer(compute_command_buffer, &commandBufferBeginInfo);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkBeginCommandBuffer failed %d", ret);
         return -1;
     }
@@ -338,6 +342,7 @@ int VkComputePrivate::end_command_buffer()
     VkResult ret = vkEndCommandBuffer(compute_command_buffer);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEndCommandBuffer failed %d", ret);
         return -1;
     }
@@ -1530,11 +1535,13 @@ void VkCompute::record_pipeline(const Pipeline* pipeline, const std::vector<VkMa
 
     if (binding_count != shader_info.binding_count)
     {
+        g_error = true;
         NCNN_LOGE("binding_count not match, expect %d but got %d + %d", shader_info.binding_count, buffer_binding_count, image_binding_count);
     }
 
     if (constant_count != shader_info.push_constant_count)
     {
+        g_error = true;
         NCNN_LOGE("push_constant_count not match, expect %d but got %d", shader_info.push_constant_count, constant_count);
     }
 
@@ -1697,6 +1704,7 @@ void VkCompute::record_pipeline(const Pipeline* pipeline, const std::vector<VkMa
                 VkResult ret = vkCreateDescriptorPool(vkdev->vkdevice(), &descriptorPoolCreateInfo, 0, &descriptor_pool);
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkCreateDescriptorPool failed %d", ret);
                     return;
                 }
@@ -1717,6 +1725,7 @@ void VkCompute::record_pipeline(const Pipeline* pipeline, const std::vector<VkMa
                 VkResult ret = vkAllocateDescriptorSets(vkdev->vkdevice(), &descriptorSetAllocateInfo, &descriptorset);
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkAllocateDescriptorSets failed %d", ret);
                     return;
                 }
@@ -1961,6 +1970,7 @@ void VkCompute::record_import_android_hardware_buffer(const ImportAndroidHardwar
                 VkResult ret = vkCreateDescriptorPool(vkdev->vkdevice(), &descriptorPoolCreateInfo, 0, &descriptor_pool);
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkCreateDescriptorPool failed %d", ret);
                     return;
                 }
@@ -1981,6 +1991,7 @@ void VkCompute::record_import_android_hardware_buffer(const ImportAndroidHardwar
                 VkResult ret = vkAllocateDescriptorSets(vkdev->vkdevice(), &descriptorSetAllocateInfo, &descriptorset);
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkAllocateDescriptorSets failed %d", ret);
                     return;
                 }
@@ -2185,6 +2196,7 @@ void VkCompute::record_import_android_hardware_buffer(const ImportAndroidHardwar
                 VkResult ret = vkCreateDescriptorPool(vkdev->vkdevice(), &descriptorPoolCreateInfo, 0, &descriptor_pool);
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkCreateDescriptorPool failed %d", ret);
                     return;
                 }
@@ -2205,6 +2217,7 @@ void VkCompute::record_import_android_hardware_buffer(const ImportAndroidHardwar
                 VkResult ret = vkAllocateDescriptorSets(vkdev->vkdevice(), &descriptorSetAllocateInfo, &descriptorset);
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkAllocateDescriptorSets failed %d", ret);
                     return;
                 }
@@ -2398,6 +2411,7 @@ int VkCompute::submit_and_wait()
     VkQueue compute_queue = vkdev->acquire_queue(vkdev->info.compute_queue_family_index());
     if (compute_queue == 0)
     {
+        g_error = true;
         NCNN_LOGE("out of compute queue");
         return -1;
     }
@@ -2418,6 +2432,7 @@ int VkCompute::submit_and_wait()
         VkResult ret = vkQueueSubmit(compute_queue, 1, &submitInfo, d->compute_command_fence);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkQueueSubmit failed %d", ret);
             vkdev->reclaim_queue(vkdev->info.compute_queue_family_index(), compute_queue);
             return -1;
@@ -2431,6 +2446,7 @@ int VkCompute::submit_and_wait()
         VkResult ret = vkWaitForFences(vkdev->vkdevice(), 1, &d->compute_command_fence, VK_TRUE, (uint64_t)-1);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkWaitForFences failed %d", ret);
             return -1;
         }
@@ -2522,6 +2538,7 @@ int VkCompute::reset()
         VkResult ret = vkResetCommandBuffer(d->compute_command_buffer, 0);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkResetCommandBuffer failed %d", ret);
             return -1;
         }
@@ -2530,6 +2547,7 @@ int VkCompute::reset()
         VkResult ret = vkResetFences(vkdev->vkdevice(), 1, &d->compute_command_fence);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkResetFences failed %d", ret);
             return -1;
         }
@@ -2564,6 +2582,7 @@ int VkCompute::create_query_pool(uint32_t _query_count)
     VkResult ret = vkCreateQueryPool(vkdev->vkdevice(), &queryPoolCreateInfo, 0, &d->query_pool);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateQueryPool failed %d", ret);
         return -1;
     }
@@ -2581,6 +2600,7 @@ int VkCompute::get_query_pool_results(uint32_t first_query, uint32_t query_count
 {
     if (results.size() < first_query + query_count)
     {
+        g_error = true;
         NCNN_LOGE("results not large enough");
         return -1;
     }
@@ -2589,6 +2609,7 @@ int VkCompute::get_query_pool_results(uint32_t first_query, uint32_t query_count
                                          query_count * sizeof(uint64_t), results.data() + first_query, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT);
     if (ret != VK_SUCCESS && ret != VK_NOT_READY)
     {
+        g_error = true;
         NCNN_LOGE("vkGetQueryPoolResults failed %d", ret);
         return -1;
     }
@@ -2809,6 +2830,7 @@ int VkTransferPrivate::init()
         VkResult ret = vkCreateCommandPool(vkdev->vkdevice(), &commandPoolCreateInfo, 0, &compute_command_pool);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkCreateCommandPool failed %d", ret);
             return -1;
         }
@@ -2826,6 +2848,7 @@ int VkTransferPrivate::init()
         VkResult ret = vkAllocateCommandBuffers(vkdev->vkdevice(), &commandBufferAllocateInfo, &compute_command_buffer);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkAllocateCommandBuffers failed %d", ret);
             return -1;
         }
@@ -2841,6 +2864,7 @@ int VkTransferPrivate::init()
         VkResult ret = vkCreateFence(vkdev->vkdevice(), &fenceCreateInfo, 0, &compute_command_fence);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkCreateFence failed %d", ret);
             return -1;
         }
@@ -2859,6 +2883,7 @@ int VkTransferPrivate::init()
             VkResult ret = vkCreateCommandPool(vkdev->vkdevice(), &commandPoolCreateInfo, 0, &transfer_command_pool);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkCreateCommandPool failed %d", ret);
                 return -1;
             }
@@ -2876,6 +2901,7 @@ int VkTransferPrivate::init()
             VkResult ret = vkAllocateCommandBuffers(vkdev->vkdevice(), &commandBufferAllocateInfo, &upload_command_buffer);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkAllocateCommandBuffers failed %d", ret);
                 return -1;
             }
@@ -2891,6 +2917,7 @@ int VkTransferPrivate::init()
             VkResult ret = vkCreateSemaphore(vkdev->vkdevice(), &semaphoreCreateInfo, 0, &upload_compute_semaphore);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkCreateSemaphore failed %d", ret);
                 return -1;
             }
@@ -2906,6 +2933,7 @@ int VkTransferPrivate::init()
             VkResult ret = vkCreateFence(vkdev->vkdevice(), &fenceCreateInfo, 0, &upload_command_fence);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkCreateFence failed %d", ret);
                 return -1;
             }
@@ -2929,6 +2957,7 @@ int VkTransferPrivate::begin_command_buffer()
         VkResult ret = vkBeginCommandBuffer(compute_command_buffer, &commandBufferBeginInfo);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkBeginCommandBuffer failed %d", ret);
             return -1;
         }
@@ -2946,6 +2975,7 @@ int VkTransferPrivate::begin_command_buffer()
             VkResult ret = vkBeginCommandBuffer(upload_command_buffer, &commandBufferBeginInfo);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkBeginCommandBuffer failed %d", ret);
                 return -1;
             }
@@ -2961,6 +2991,7 @@ int VkTransferPrivate::end_command_buffer()
         VkResult ret = vkEndCommandBuffer(compute_command_buffer);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkEndCommandBuffer failed %d", ret);
             return -1;
         }
@@ -2972,6 +3003,7 @@ int VkTransferPrivate::end_command_buffer()
             VkResult ret = vkEndCommandBuffer(upload_command_buffer);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkEndCommandBuffer failed %d", ret);
                 return -1;
             }
@@ -3379,6 +3411,7 @@ int VkTransfer::submit_and_wait()
     VkQueue compute_queue = vkdev->acquire_queue(vkdev->info.compute_queue_family_index());
     if (compute_queue == 0)
     {
+        g_error = true;
         NCNN_LOGE("out of compute queue");
         return -1;
     }
@@ -3401,6 +3434,7 @@ int VkTransfer::submit_and_wait()
             VkResult ret = vkQueueSubmit(compute_queue, 1, &submitInfo, d->compute_command_fence);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkQueueSubmit failed %d", ret);
                 vkdev->reclaim_queue(vkdev->info.compute_queue_family_index(), compute_queue);
                 return -1;
@@ -3412,6 +3446,7 @@ int VkTransfer::submit_and_wait()
         VkQueue transfer_queue = vkdev->acquire_queue(vkdev->info.transfer_queue_family_index());
         if (transfer_queue == 0)
         {
+            g_error = true;
             NCNN_LOGE("out of transfer queue");
             vkdev->reclaim_queue(vkdev->info.compute_queue_family_index(), compute_queue);
             return -1;
@@ -3433,6 +3468,7 @@ int VkTransfer::submit_and_wait()
             VkResult ret = vkQueueSubmit(transfer_queue, 1, &submitInfo, d->upload_command_fence);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkQueueSubmit failed %d", ret);
                 vkdev->reclaim_queue(vkdev->info.transfer_queue_family_index(), transfer_queue);
                 vkdev->reclaim_queue(vkdev->info.compute_queue_family_index(), compute_queue);
@@ -3456,6 +3492,7 @@ int VkTransfer::submit_and_wait()
             VkResult ret = vkQueueSubmit(compute_queue, 1, &submitInfo, d->compute_command_fence);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("vkQueueSubmit failed %d", ret);
                 vkdev->reclaim_queue(vkdev->info.transfer_queue_family_index(), transfer_queue);
                 vkdev->reclaim_queue(vkdev->info.compute_queue_family_index(), compute_queue);
@@ -3474,6 +3511,7 @@ int VkTransfer::submit_and_wait()
         VkResult ret = vkWaitForFences(vkdev->vkdevice(), 1, &d->compute_command_fence, VK_TRUE, (uint64_t)-1);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkWaitForFences failed %d", ret);
             return -1;
         }
@@ -3485,6 +3523,7 @@ int VkTransfer::submit_and_wait()
         VkResult ret = vkWaitForFences(vkdev->vkdevice(), 2, fences, VK_TRUE, (uint64_t)-1);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkWaitForFences failed %d", ret);
             return -1;
         }

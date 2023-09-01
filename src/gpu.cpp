@@ -918,6 +918,7 @@ static int find_default_vulkan_device_index()
     if (g_gpu_count > 0)
         return 0;
 
+    g_error = true;
     NCNN_LOGE("no vulkan device");
     return -1;
 }
@@ -940,6 +941,7 @@ int create_gpu_instance()
     ret = vkEnumerateInstanceLayerProperties(&instanceLayerPropertyCount, NULL);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEnumerateInstanceLayerProperties failed %d", ret);
         return -1;
     }
@@ -948,6 +950,7 @@ int create_gpu_instance()
     ret = vkEnumerateInstanceLayerProperties(&instanceLayerPropertyCount, instanceLayerProperties.data());
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEnumerateInstanceLayerProperties failed %d", ret);
         return -1;
     }
@@ -978,6 +981,7 @@ int create_gpu_instance()
     ret = vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionPropertyCount, NULL);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEnumerateInstanceExtensionProperties failed %d", ret);
         return -1;
     }
@@ -986,6 +990,7 @@ int create_gpu_instance()
     ret = vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionPropertyCount, instanceExtensionProperties.data());
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEnumerateInstanceExtensionProperties failed %d", ret);
         return -1;
     }
@@ -1064,6 +1069,7 @@ int create_gpu_instance()
         ret = vkEnumerateInstanceVersion(&instance_api_version);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkEnumerateInstanceVersion failed %d", ret);
             return -1;
         }
@@ -1131,6 +1137,7 @@ int create_gpu_instance()
     ret = vkCreateInstance(&instanceCreateInfo, 0, &instance);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateInstance failed %d", ret);
         return -1;
     }
@@ -1161,6 +1168,7 @@ int create_gpu_instance()
     ret = vkEnumeratePhysicalDevices(g_instance, &physicalDeviceCount, 0);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEnumeratePhysicalDevices failed %d", ret);
         return -1;
     }
@@ -1173,6 +1181,7 @@ int create_gpu_instance()
     ret = vkEnumeratePhysicalDevices(g_instance, &physicalDeviceCount, physicalDevices.data());
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEnumeratePhysicalDevices failed %d", ret);
         return -1;
     }
@@ -1407,6 +1416,7 @@ int create_gpu_instance()
         ret = vkEnumerateDeviceExtensionProperties(physicalDevice, NULL, &deviceExtensionPropertyCount, NULL);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkEnumerateDeviceExtensionProperties failed %d", ret);
             return -1;
         }
@@ -1415,6 +1425,7 @@ int create_gpu_instance()
         ret = vkEnumerateDeviceExtensionProperties(physicalDevice, NULL, &deviceExtensionPropertyCount, deviceExtensionProperties.data());
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkEnumerateDeviceExtensionProperties failed %d", ret);
             return -1;
         }
@@ -2019,6 +2030,7 @@ const ncnn::Packing_vulkan* VulkanDevicePrivate::get_utility_operator(int storag
 
     if ((cast_type_from_index == 1 && cast_type_to_index == 2) || (cast_type_from_index == 2 && cast_type_to_index == 1))
     {
+        g_error = true;
         NCNN_LOGE("no fp16p to/from fp16s conversion");
         return 0;
     }
@@ -2031,12 +2043,14 @@ const ncnn::Packing_vulkan* VulkanDevicePrivate::get_utility_operator(int storag
 
     if (!vkdev->info.support_fp16_packed() && opt.use_fp16_packed)
     {
+        g_error = true;
         NCNN_LOGE("cannot create uop with use_fp16_packed if not support_fp16_packed");
         return 0;
     }
 
     if (!vkdev->info.support_fp16_storage() && opt.use_fp16_storage)
     {
+        g_error = true;
         NCNN_LOGE("cannot create uop with use_fp16_storage if not support_fp16_storage");
         return 0;
     }
@@ -2348,6 +2362,7 @@ VulkanDevice::VulkanDevice(int device_index)
     VkResult ret = vkCreateDevice(info.physical_device(), &deviceCreateInfo, 0, &d->device);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateDevice failed %d", ret);
     }
 
@@ -2412,6 +2427,7 @@ VulkanDevice::VulkanDevice(int device_index)
         ret = vkCreateSampler(d->device, &samplerCreateInfo, 0, &d->texelfetch_sampler);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkCreateSampler failed %d", ret);
         }
     }
@@ -2419,6 +2435,7 @@ VulkanDevice::VulkanDevice(int device_index)
     int cret = d->create_dummy_buffer_image();
     if (cret != 0)
     {
+        g_error = true;
         NCNN_LOGE("VulkanDevice create_dummy_buffer_image failed %d", cret);
     }
 
@@ -2484,6 +2501,7 @@ VkShaderModule VulkanDevice::compile_shader_module(const uint32_t* spv_data, siz
     VkResult ret = vkCreateShaderModule(d->device, &shaderModuleCreateInfo, 0, &shader_module);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateShaderModule failed %d", ret);
         return 0;
     }
@@ -2650,6 +2668,7 @@ int VulkanDevice::create_descriptorset_layout(int binding_count, const int* bind
     VkResult ret = vkCreateDescriptorSetLayout(d->device, &descriptorSetLayoutCreateInfo, 0, descriptorset_layout);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateDescriptorSetLayout failed %d", ret);
         return -1;
     }
@@ -2694,6 +2713,7 @@ int VulkanDevice::create_pipeline_layout(int push_constant_count, VkDescriptorSe
     VkResult ret = vkCreatePipelineLayout(d->device, &pipelineLayoutCreateInfo, 0, pipeline_layout);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreatePipelineLayout failed %d", ret);
         return -1;
     }
@@ -2740,6 +2760,7 @@ int VulkanDevice::create_pipeline(VkShaderModule shader_module, VkPipelineLayout
     VkResult ret = vkCreateComputePipelines(d->device, 0, 1, &computePipelineCreateInfo, 0, pipeline);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateComputePipelines failed %d", ret);
         return -1;
     }
@@ -2809,6 +2830,7 @@ int VulkanDevice::create_descriptor_update_template(int binding_count, const int
     VkResult ret = vkCreateDescriptorUpdateTemplateKHR(d->device, &descriptorUpdateTemplateCreateInfo, 0, descriptor_update_template);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateDescriptorUpdateTemplateKHR failed %d", ret);
         return -1;
     }
@@ -2880,6 +2902,7 @@ uint32_t VulkanDevice::find_memory_index(uint32_t memory_type_bits, VkFlags requ
         }
     }
 
+    g_error = true;
     NCNN_LOGE("no such memory type %u %u %u %u", memory_type_bits, required, preferred, preferred_not);
     return -1;
 }
@@ -2904,6 +2927,7 @@ VkQueue VulkanDevice::acquire_queue(uint32_t queue_family_index) const
             && queue_family_index != info.graphics_queue_family_index()
             && queue_family_index != info.transfer_queue_family_index())
     {
+        g_error = true;
         NCNN_LOGE("invalid queue_family_index %u", queue_family_index);
         return 0;
     }
@@ -2945,6 +2969,7 @@ VkQueue VulkanDevice::acquire_queue(uint32_t queue_family_index) const
 
     if (!queue)
     {
+        g_error = true;
         NCNN_LOGE("FATAL ERROR! out of hardware queue %u", queue_family_index);
     }
 
@@ -2963,6 +2988,7 @@ void VulkanDevice::reclaim_queue(uint32_t queue_family_index, VkQueue queue) con
             && queue_family_index != info.graphics_queue_family_index()
             && queue_family_index != info.transfer_queue_family_index())
     {
+        g_error = true;
         NCNN_LOGE("invalid queue_family_index %u", queue_family_index);
         return;
     }
@@ -2997,6 +3023,7 @@ void VulkanDevice::reclaim_queue(uint32_t queue_family_index, VkQueue queue) con
 
     if (i == queues.size())
     {
+        g_error = true;
         NCNN_LOGE("FATAL ERROR! reclaim_queue get wild queue %u %p", queue_family_index, queue);
     }
 
@@ -3041,6 +3068,7 @@ void VulkanDevice::reclaim_blob_allocator(VkAllocator* allocator) const
         }
     }
 
+    g_error = true;
     NCNN_LOGE("FATAL ERROR! reclaim_blob_allocator get wild allocator %p", allocator);
 }
 
@@ -3078,6 +3106,7 @@ void VulkanDevice::reclaim_staging_allocator(VkAllocator* allocator) const
         }
     }
 
+    g_error = true;
     NCNN_LOGE("FATAL ERROR! reclaim_staging_allocator get wild allocator %p", allocator);
 }
 
@@ -4054,6 +4083,7 @@ int compile_spirv_module(const char* comp_data, int comp_data_size, const Option
         bool pr = s.parse(&resources, 100, ENoProfile, false, false, EShMsgDefault, includer);
         if (!pr)
         {
+            g_error = true;
             NCNN_LOGE("compile spir-v module failed");
             NCNN_LOGE("%s", s.getInfoLog());
             NCNN_LOGE("%s", s.getInfoDebugLog());
@@ -4074,6 +4104,7 @@ int compile_spirv_module(int shader_type_index, const Option& opt, std::vector<u
 {
     if (shader_type_index < 0 || shader_type_index >= layer_shader_registry_entry_count)
     {
+        g_error = true;
         NCNN_LOGE("no such shader module %d", shader_type_index);
         return -1;
     }
@@ -4210,6 +4241,7 @@ int resolve_shader_info(const uint32_t* spv_data, size_t spv_data_size, ShaderIn
 
     if (binding_count > 16)
     {
+        g_error = true;
         NCNN_LOGE("too many binding %d", binding_count);
         return -1;
     }

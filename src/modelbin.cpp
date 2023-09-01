@@ -113,6 +113,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
         nread = d->dr.read(&flag_struct, sizeof(flag_struct));
         if (nread != sizeof(flag_struct))
         {
+            g_error = true;
             NCNN_LOGE("ModelBin read flag_struct failed %zd", nread);
             return Mat();
         }

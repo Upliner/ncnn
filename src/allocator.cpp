@@ -51,6 +51,7 @@ PoolAllocator::~PoolAllocator()
 
     if (!d->payouts.empty())
     {
+        g_error = true;
         NCNN_LOGE("FATAL ERROR! pool allocator destroyed too early");
 #if NCNN_STDIO
         std::list<std::pair<size_t, void*> >::iterator it = d->payouts.begin();
@@ -94,6 +95,7 @@ void PoolAllocator::set_size_compare_ratio(float scr)
 {
     if (scr < 0.f || scr > 1.f)
     {
+        g_error = true;
         NCNN_LOGE("invalid size compare ratio %f", scr);
         return;
     }
@@ -206,6 +208,7 @@ void PoolAllocator::fastFree(void* ptr)
 
     d->payouts_lock.unlock();
 
+    g_error = true;
     NCNN_LOGE("FATAL ERROR! pool allocator get wild %p", ptr);
     ncnn::fastFree(ptr);
 }
@@ -232,6 +235,7 @@ UnlockedPoolAllocator::~UnlockedPoolAllocator()
 
     if (!d->payouts.empty())
     {
+        g_error = true;
         NCNN_LOGE("FATAL ERROR! unlocked pool allocator destroyed too early");
 #if NCNN_STDIO
         std::list<std::pair<size_t, void*> >::iterator it = d->payouts.begin();
@@ -271,6 +275,7 @@ void UnlockedPoolAllocator::set_size_compare_ratio(float scr)
 {
     if (scr < 0.f || scr > 1.f)
     {
+        g_error = true;
         NCNN_LOGE("invalid size compare ratio %f", scr);
         return;
     }
@@ -353,6 +358,7 @@ void UnlockedPoolAllocator::fastFree(void* ptr)
         }
     }
 
+    g_error = true;
     NCNN_LOGE("FATAL ERROR! unlocked pool allocator get wild %p", ptr);
     ncnn::fastFree(ptr);
 }
@@ -402,6 +408,7 @@ int VkAllocator::flush(VkBufferMemory* ptr)
     VkResult ret = vkFlushMappedMemoryRanges(vkdev->vkdevice(), 1, &mappedMemoryRange);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkFlushMappedMemoryRanges failed %d", ret);
         return -1;
     }
@@ -424,6 +431,7 @@ int VkAllocator::invalidate(VkBufferMemory* ptr)
     VkResult ret = vkInvalidateMappedMemoryRanges(vkdev->vkdevice(), 1, &mappedMemoryRange);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkInvalidateMappedMemoryRanges failed %d", ret);
         return -1;
     }
@@ -447,6 +455,7 @@ VkBuffer VkAllocator::create_buffer(size_t size, VkBufferUsageFlags usage)
     VkResult ret = vkCreateBuffer(vkdev->vkdevice(), &bufferCreateInfo, 0, &buffer);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateBuffer failed %d", ret);
         return 0;
     }
@@ -466,6 +475,7 @@ VkDeviceMemory VkAllocator::allocate_memory(size_t size, uint32_t memory_type_in
     VkResult ret = vkAllocateMemory(vkdev->vkdevice(), &memoryAllocateInfo, 0, &memory);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkAllocateMemory failed %d", ret);
         return 0;
     }
@@ -492,6 +502,7 @@ VkDeviceMemory VkAllocator::allocate_dedicated_memory(size_t size, uint32_t memo
     VkResult ret = vkAllocateMemory(vkdev->vkdevice(), &memoryAllocateInfo, 0, &memory);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkAllocateMemory failed %d", ret);
         return 0;
     }
@@ -524,6 +535,7 @@ VkImage VkAllocator::create_image(int width, int height, int depth, VkFormat for
     VkResult ret = vkCreateImage(vkdev->vkdevice(), &imageCreateInfo, 0, &image);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateImage failed %d %d %d %d %d %d %d", ret, width, height, depth, format, tiling, usage);
         return 0;
     }
@@ -554,6 +566,7 @@ VkImageView VkAllocator::create_imageview(VkImage image, VkFormat format)
     VkResult ret = vkCreateImageView(vkdev->vkdevice(), &imageViewCreateInfo, 0, &imageview);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateImageView failed %d", ret);
         return 0;
     }
@@ -814,6 +827,7 @@ void VkBlobAllocator::fastFree(VkBufferMemory* ptr)
 
     if (block_index == -1)
     {
+        g_error = true;
         NCNN_LOGE("FATAL ERROR! unlocked VkBlobAllocator get wild %p", ptr->buffer);
 
         delete ptr;
@@ -871,6 +885,7 @@ VkImageMemory* VkBlobAllocator::fastMalloc(int w, int h, int c, size_t elemsize,
 {
     if (elempack != 1 && elempack != 4 && elempack != 8)
     {
+        g_error = true;
         NCNN_LOGE("elempack must be 1 4 8");
         return 0;
     }
@@ -903,6 +918,7 @@ VkImageMemory* VkBlobAllocator::fastMalloc(int w, int h, int c, size_t elemsize,
 
     if (width > (int)vkdev->info.max_image_dimension_3d() || height > (int)vkdev->info.max_image_dimension_3d() || depth > (int)vkdev->info.max_image_dimension_3d())
     {
+        g_error = true;
         NCNN_LOGE("image dimension too large %d %d %d > %d", width, height, depth, (int)vkdev->info.max_image_dimension_3d());
         return 0;
     }
@@ -1081,6 +1097,7 @@ void VkBlobAllocator::fastFree(VkImageMemory* ptr)
 
     if (block_index == -1)
     {
+        g_error = true;
         NCNN_LOGE("FATAL ERROR! unlocked VkBlobAllocator get wild %p", ptr->memory);
 
         if (!ptr->command_refcount)
@@ -1441,6 +1458,7 @@ VkImageMemory* VkWeightAllocator::fastMalloc(int w, int h, int c, size_t elemsiz
 {
     if (elempack != 1 && elempack != 4 && elempack != 8 && elempack != 16 && elempack != 32 && elempack != 64)
     {
+        g_error = true;
         NCNN_LOGE("elempack must be 1 4 8 16 32 64");
         return 0;
     }
@@ -1482,6 +1500,7 @@ VkImageMemory* VkWeightAllocator::fastMalloc(int w, int h, int c, size_t elemsiz
 
     if (width > (int)vkdev->info.max_image_dimension_3d() || height > (int)vkdev->info.max_image_dimension_3d() || depth > (int)vkdev->info.max_image_dimension_3d())
     {
+        g_error = true;
         NCNN_LOGE("image dimension too large %d %d %d > %d", width, height, depth, (int)vkdev->info.max_image_dimension_3d());
         return 0;
     }
@@ -1726,6 +1745,7 @@ void VkStagingAllocator::set_size_compare_ratio(float scr)
 {
     if (scr < 0.f || scr > 1.f)
     {
+        g_error = true;
         NCNN_LOGE("invalid size compare ratio %f", scr);
         return;
     }
@@ -2007,6 +2027,7 @@ VkImageMemory* VkAndroidHardwareBufferImageAllocator::fastMalloc(int /*w*/, int 
     ret = vkCreateImage(vkdev->vkdevice(), &imageCreateInfo, 0, &image);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateImage failed %d", ret);
         return 0;
     }
@@ -2038,6 +2059,7 @@ VkImageMemory* VkAndroidHardwareBufferImageAllocator::fastMalloc(int /*w*/, int 
     ret = vkAllocateMemory(vkdev->vkdevice(), &memoryAllocateInfo, 0, &memory);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkAllocateMemory failed %d", ret);
         return 0;
     }
@@ -2051,6 +2073,7 @@ VkImageMemory* VkAndroidHardwareBufferImageAllocator::fastMalloc(int /*w*/, int 
     ret = vkdev->vkBindImageMemory2KHR(vkdev->vkdevice(), 1, &bindImageMemoryInfo);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkBindImageMemory2KHR failed %d", ret);
         vkDestroyImage(vkdev->vkdevice(), image, 0);
         return 0;
@@ -2082,6 +2105,7 @@ VkImageMemory* VkAndroidHardwareBufferImageAllocator::fastMalloc(int /*w*/, int 
     ret = vkCreateImageView(vkdev->vkdevice(), &imageViewCreateInfo, 0, &imageview);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateImageView failed %d", ret);
         vkDestroyImage(vkdev->vkdevice(), image, 0);
         vkFreeMemory(vkdev->vkdevice(), memory, 0);
@@ -2124,6 +2148,7 @@ int VkAndroidHardwareBufferImageAllocator::init()
     ret = vkdev->vkGetAndroidHardwareBufferPropertiesANDROID(vkdev->vkdevice(), hb, &bufferProperties);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkGetAndroidHardwareBufferPropertiesANDROID failed %d", ret);
         return -1;
     }
@@ -2149,6 +2174,7 @@ int VkAndroidHardwareBufferImageAllocator::init()
     ret = vkdev->vkCreateSamplerYcbcrConversionKHR(vkdev->vkdevice(), &samplerYcbcrConversionCreateInfo, 0, &samplerYcbcrConversion);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateSamplerYcbcrConversionKHR failed %d", ret);
         return -1;
     }
