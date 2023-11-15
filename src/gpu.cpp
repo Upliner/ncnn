@@ -1155,6 +1155,7 @@ int create_gpu_instance()
         ret = CreateDebugUtilsMessengerEXT(g_instance, &createInfo, NULL, &g_instance.callback);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("CreateDebugUtilsMessengerEXT failed %d", ret);
             return -1;
         }
@@ -1687,6 +1688,7 @@ int create_gpu_instance()
                 ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physicalDevice, &propertyCount, 0);
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR failed %d", ret);
                 }
 
@@ -1694,6 +1696,7 @@ int create_gpu_instance()
                 ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physicalDevice, &propertyCount, properties.data());
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR failed %d", ret);
                 }
 
@@ -1731,6 +1734,7 @@ int create_gpu_instance()
                 ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(physicalDevice, &propertyCount, 0);
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesNV failed %d", ret);
                 }
 
@@ -1743,6 +1747,7 @@ int create_gpu_instance()
                 ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(physicalDevice, &propertyCount, properties.data());
                 if (ret != VK_SUCCESS)
                 {
+                    g_error = true;
                     NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesNV failed %d", ret);
                 }
 

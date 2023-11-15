@@ -382,6 +382,7 @@ IMAGE_ALLOCATION_FAILED:
 
     if (image_allocation_failed)
     {
+        g_error = true;
 #if NCNN_STRING
         NCNN_LOGE("forward_layer %d %s image allocation failed, fallback to cpu", layer_index, layer->name.c_str());
 #else
@@ -2412,6 +2413,7 @@ void Extractor::set_vulkan_compute(bool enable)
     }
     else
     {
+        g_error = true;
         NCNN_LOGE("set_vulkan_compute failed, network use_vulkan_compute disabled");
     }
 }

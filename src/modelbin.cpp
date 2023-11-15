@@ -139,6 +139,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 nread = d->dr.read(&float16_weights[0], align_data_size);
                 if (nread != align_data_size)
                 {
+                    g_error = true;
                     NCNN_LOGE("ModelBin read float16_weights failed %zd", nread);
                     return Mat();
                 }
@@ -167,6 +168,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 nread = d->dr.read(&int8_weights[0], align_data_size);
                 if (nread != align_data_size)
                 {
+                    g_error = true;
                     NCNN_LOGE("ModelBin read int8_weights failed %zd", nread);
                     return Mat();
                 }
@@ -199,6 +201,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 nread = d->dr.read(m, w * sizeof(float));
                 if (nread != w * sizeof(float))
                 {
+                    g_error = true;
                     NCNN_LOGE("ModelBin read weight_data failed %zd", nread);
                     return Mat();
                 }
@@ -218,6 +221,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
             nread = d->dr.read(quantization_value, 256 * sizeof(float));
             if (nread != 256 * sizeof(float))
             {
+                g_error = true;
                 NCNN_LOGE("ModelBin read quantization_value failed %zd", nread);
                 return Mat();
             }
@@ -228,6 +232,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
             nread = d->dr.read(&index_array[0], align_weight_data_size);
             if (nread != align_weight_data_size)
             {
+                g_error = true;
                 NCNN_LOGE("ModelBin read index_array failed %zd", nread);
                 return Mat();
             }
@@ -257,6 +262,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 nread = d->dr.read(m, w * sizeof(float));
                 if (nread != w * sizeof(float))
                 {
+                    g_error = true;
                     NCNN_LOGE("ModelBin read weight_data failed %zd", nread);
                     return Mat();
                 }
@@ -284,6 +290,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
             size_t nread = d->dr.read(m, w * sizeof(float));
             if (nread != w * sizeof(float))
             {
+                g_error = true;
                 NCNN_LOGE("ModelBin read weight_data failed %zd", nread);
                 return Mat();
             }
@@ -293,6 +300,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
     }
     else
     {
+        g_error = true;
         NCNN_LOGE("ModelBin load type %d not implemented", type);
         return Mat();
     }

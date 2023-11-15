@@ -58,6 +58,7 @@ PoolAllocator::~PoolAllocator()
         for (; it != d->payouts.end(); ++it)
         {
             void* ptr = it->second;
+            g_error = true;
             NCNN_LOGE("%p still in use", ptr);
         }
 #endif
@@ -242,6 +243,7 @@ UnlockedPoolAllocator::~UnlockedPoolAllocator()
         for (; it != d->payouts.end(); ++it)
         {
             void* ptr = it->second;
+            g_error = true;
             NCNN_LOGE("%p still in use", ptr);
         }
 #endif
