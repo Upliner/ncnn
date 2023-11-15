@@ -237,6 +237,7 @@ private:
     Mutex& mutex;
 };
 extern std::ostringstream err_log;
+extern char __log_tmp_buf[256];
 } // namespace ncnn
 
 #define NCNN_HAVE_ERROR_LOG
@@ -268,14 +269,13 @@ extern std::ostringstream err_log;
     __android_log_print(ANDROID_LOG_WARN, "ncnn", ##__VA_ARGS__); } while(0)
 #else // NCNN_PLATFORM_API && __ANDROID_API__ >= 8
 #include <stdio.h>
-template<class... Ts>
-static void NCNN_LOGE(Ts... args) {
-    char buf[256];
-    snprintf(buf, sizeof(buf), args...);
-    buf[sizeof(buf)-1] = 0;
-    std::cerr << buf << std::endl;
-    err_log << buf << std::endl;
-}
+#define NCNN_LOGE(...) do { \
+    snprintf(__log_tmp_buf, sizeof(__log_tmp_buf), ##__VA_ARGS__);\
+    __log_tmp_buf[sizeof(__log_tmp_buf)-1] = 0;\
+    std::cerr << __log_tmp_buf << std::endl;\
+    ncnn::err_log << __log_tmp_buf << std::endl;\
+} while (0)
+#endif // NCNN_PLATFORM_API && __ANDROID_API__ >= 8
 #else
 #define NCNN_LOGE(...)
 #endif

@@ -20,6 +20,7 @@ namespace ncnn {
 
 bool g_error = false;
 std::ostringstream err_log;
+char __log_tmp_buf[256];
 
 Option::Option()
 {
