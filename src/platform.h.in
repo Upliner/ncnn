@@ -270,10 +270,10 @@ extern char __log_tmp_buf[256];
 #else // NCNN_PLATFORM_API && __ANDROID_API__ >= 8
 #include <stdio.h>
 #define NCNN_LOGE(...) do { \
-    snprintf(__log_tmp_buf, sizeof(__log_tmp_buf), ##__VA_ARGS__);\
-    __log_tmp_buf[sizeof(__log_tmp_buf)-1] = 0;\
-    std::cerr << __log_tmp_buf << std::endl;\
-    ncnn::err_log << __log_tmp_buf << std::endl;\
+    snprintf(ncnn::__log_tmp_buf, sizeof(ncnn::__log_tmp_buf), ##__VA_ARGS__);\
+    ncnn::__log_tmp_buf[sizeof(ncnn::__log_tmp_buf)-1] = 0;\
+    std::cerr << ncnn::__log_tmp_buf << std::endl;\
+    ncnn::err_log << ncnn::__log_tmp_buf << std::endl;\
 } while (0)
 #endif // NCNN_PLATFORM_API && __ANDROID_API__ >= 8
 #else
