@@ -39,6 +39,7 @@ set(ncnn_SRCS
     simpleocv.cpp
     simpleomp.cpp
     simplestl.cpp
+    simplemath.cpp
 )
 
 if(ANDROID)
@@ -162,6 +163,10 @@ ncnn_add_layer(Unfold)
 ncnn_add_layer(GridSample)
 ncnn_add_layer(CumulativeSum)
 ncnn_add_layer(CopyTo)
+ncnn_add_layer(Erf)
+ncnn_add_layer(Diag)
+ncnn_add_layer(CELU)
+ncnn_add_layer(Shrink)
 
 if(NCNN_VULKAN)
     ncnn_add_shader(${CMAKE_CURRENT_SOURCE_DIR}/convert_ycbcr.comp)
@@ -203,7 +208,7 @@ if(NOT NCNN_SHARED_LIB)
     set_target_properties(ncnn PROPERTIES COMPILE_FLAGS -DNCNN_STATIC_DEFINE)
 endif()
 
-if(NCNN_SIMPLESTL)
+if(NCNN_SIMPLESTL AND NOT NCNN_SIMPLEMATH)
     # link math lib explicitly
     target_link_libraries(ncnn PUBLIC m)
 endif()
@@ -256,7 +261,6 @@ if(NCNN_THREADS)
     if(TARGET Threads::Threads)
         target_link_libraries(ncnn PUBLIC Threads::Threads)
     endif()
-
     if(NCNN_SIMPLEOMP OR NCNN_SIMPLESTL)
         target_link_libraries(ncnn PUBLIC pthread)
     endif()
@@ -576,6 +580,7 @@ if(NCNN_INSTALL_SDK)
         simpleocv.h
         simpleomp.h
         simplestl.h
+        simplemath.h
         vulkan_header_fix.h
         ${CMAKE_CURRENT_BINARY_DIR}/ncnn_export.h
         ${CMAKE_CURRENT_BINARY_DIR}/layer_shader_type_enum.h
@@ -595,4 +600,3 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(TARGET ncnn PROPERTY FOLDER "libncnn")
 set_property(TARGET ncnn-generate-spirv PROPERTY FOLDER "libncnn")
-
