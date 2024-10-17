@@ -77,6 +77,7 @@ void operator delete[](void* /*ptr*/, void* /*voidptr2*/)
 
 extern "C" void __cxa_pure_virtual()
 {
+    g_error = true;
     NCNN_LOGE("[Fatal] Pure virtual func called, now exit.");
     // do not abort here to avoid more unpredictable behaviour
 }

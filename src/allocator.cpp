@@ -1955,6 +1955,7 @@ void VkWeightStagingAllocator::fastFree(VkImageMemory* /*ptr*/)
 {
 }
 
+#if NCNN_PLATFORM_API
 #if __ANDROID_API__ >= 26
 VkAndroidHardwareBufferImageAllocator::VkAndroidHardwareBufferImageAllocator(const VulkanDevice* _vkdev, AHardwareBuffer* _hb)
     : VkAllocator(_vkdev), hb(_hb)
@@ -2199,6 +2200,7 @@ uint64_t VkAndroidHardwareBufferImageAllocator::external_format() const
     return bufferFormatProperties.externalFormat;
 }
 #endif // __ANDROID_API__ >= 26
+#endif // NCNN_PLATFORM_API
 
 #endif // NCNN_VULKAN
 

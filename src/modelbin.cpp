@@ -118,6 +118,10 @@ Mat ModelBinFromDataReader::load(int w, int type) const
             return Mat();
         }
 
+#if __BIG_ENDIAN__
+        swap_endianness_32(&flag_struct.tag);
+#endif
+
         unsigned int flag = (int)flag_struct.f0 + flag_struct.f1 + flag_struct.f2 + flag_struct.f3;
 
         if (flag_struct.tag == 0x01306B47)
@@ -125,6 +129,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
             // half-precision data
             size_t align_data_size = alignSize(w * sizeof(unsigned short), 4);
 
+#if !__BIG_ENDIAN__
             // try reference data
             const void* refbuf = 0;
             nread = d->dr.reference(align_data_size, &refbuf);
@@ -133,6 +138,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 m = Mat::from_float16((const unsigned short*)refbuf, w);
             }
             else
+#endif
             {
                 std::vector<unsigned short> float16_weights;
                 float16_weights.resize(align_data_size);
@@ -144,6 +150,13 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                     return Mat();
                 }
 
+#if __BIG_ENDIAN__
+                for (int i = 0; i < w; i++)
+                {
+                    swap_endianness_16(&float16_weights[i]);
+                }
+#endif
+
                 m = Mat::from_float16(&float16_weights[0], w);
             }
 
@@ -154,6 +167,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
             // int8 data
             size_t align_data_size = alignSize(w, 4);
 
+#if !__BIG_ENDIAN__
             // try reference data
             const void* refbuf = 0;
             nread = d->dr.reference(align_data_size, &refbuf);
@@ -162,6 +176,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 m = Mat(w, (void*)refbuf, (size_t)1u);
             }
             else
+#endif
             {
                 std::vector<signed char> int8_weights;
                 int8_weights.resize(align_data_size);
@@ -184,6 +199,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
         }
         else if (flag_struct.tag == 0x0002C056)
         {
+#if !__BIG_ENDIAN__
             // try reference data
             const void* refbuf = 0;
             nread = d->dr.reference(w * sizeof(float), &refbuf);
@@ -192,6 +208,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 m = Mat(w, (void*)refbuf);
             }
             else
+#endif
             {
                 m.create(w);
                 if (m.empty())
@@ -205,6 +222,13 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                     NCNN_LOGE("ModelBin read weight_data failed %zd", nread);
                     return Mat();
                 }
+
+#if __BIG_ENDIAN__
+                for (int i = 0; i < w; i++)
+                {
+                    swap_endianness_32((float*)m + i);
+                }
+#endif
             }
 
             return m;
@@ -226,6 +250,13 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 return Mat();
             }
 
+#if __BIG_ENDIAN__
+            for (int i = 0; i < 256; i++)
+            {
+                swap_endianness_32(&quantization_value[i]);
+            }
+#endif
+
             size_t align_weight_data_size = alignSize(w * sizeof(unsigned char), 4);
             std::vector<unsigned char> index_array;
             index_array.resize(align_weight_data_size);
@@ -245,6 +276,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
         }
         else if (flag_struct.f0 == 0)
         {
+#if !__BIG_ENDIAN__
             // try reference data
             const void* refbuf = 0;
             nread = d->dr.reference(w * sizeof(float), &refbuf);
@@ -253,6 +285,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 m = Mat(w, (void*)refbuf);
             }
             else
+#endif
             {
                 m.create(w);
                 if (m.empty())
@@ -266,6 +299,13 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                     NCNN_LOGE("ModelBin read weight_data failed %zd", nread);
                     return Mat();
                 }
+
+#if __BIG_ENDIAN__
+                for (int i = 0; i < w; i++)
+                {
+                    swap_endianness_32((float*)m + i);
+                }
+#endif
             }
         }
 
@@ -273,6 +313,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
     }
     else if (type == 1)
     {
+#if !__BIG_ENDIAN__
         // try reference data
         const void* refbuf = 0;
         size_t nread = d->dr.reference(w * sizeof(float), &refbuf);
@@ -281,6 +322,7 @@ Mat ModelBinFromDataReader::load(int w, int type) const
             m = Mat(w, (void*)refbuf);
         }
         else
+#endif
         {
             m.create(w);
             if (m.empty())
@@ -294,6 +336,13 @@ Mat ModelBinFromDataReader::load(int w, int type) const
                 NCNN_LOGE("ModelBin read weight_data failed %zd", nread);
                 return Mat();
             }
+
+#if __BIG_ENDIAN__
+            for (int i = 0; i < w; i++)
+            {
+                swap_endianness_32((float*)m + i);
+            }
+#endif
         }
 
         return m;

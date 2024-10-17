@@ -30,6 +30,7 @@
 #cmakedefine01 NCNN_PIXEL_AFFINE
 #cmakedefine01 NCNN_PIXEL_DRAWING
 #cmakedefine01 NCNN_VULKAN
+#cmakedefine01 NCNN_SIMPLEVK
 #cmakedefine01 NCNN_SYSTEM_GLSLANG
 #cmakedefine01 NCNN_RUNTIME_CPU
 #cmakedefine01 NCNN_GNU_INLINE_ASM
@@ -69,7 +70,7 @@
 #ifdef __cplusplus
 
 #if NCNN_THREADS
-#if (defined _WIN32 && !(defined __MINGW32__))
+#if defined _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <process.h>
@@ -87,7 +88,7 @@
 namespace ncnn {
 
 #if NCNN_THREADS
-#if (defined _WIN32 && !(defined __MINGW32__))
+#if defined _WIN32
 class NCNN_EXPORT Mutex
 {
 public:
@@ -142,7 +143,7 @@ public:
 private:
     DWORD key;
 };
-#else // (defined _WIN32 && !(defined __MINGW32__))
+#else // defined _WIN32
 class NCNN_EXPORT Mutex
 {
 public:
@@ -187,7 +188,7 @@ public:
 private:
     pthread_key_t key;
 };
-#endif // (defined _WIN32 && !(defined __MINGW32__))
+#endif // defined _WIN32
 #else // NCNN_THREADS
 class NCNN_EXPORT Mutex
 {
@@ -238,6 +239,29 @@ private:
 };
 extern std::ostringstream err_log;
 extern char __log_tmp_buf[256];
+
+static inline void swap_endianness_16(void* x)
+{
+    unsigned char* xx = (unsigned char*)x;
+    unsigned char x0 = xx[0];
+    unsigned char x1 = xx[1];
+    xx[0] = x1;
+    xx[1] = x0;
+}
+
+static inline void swap_endianness_32(void* x)
+{
+    unsigned char* xx = (unsigned char*)x;
+    unsigned char x0 = xx[0];
+    unsigned char x1 = xx[1];
+    unsigned char x2 = xx[2];
+    unsigned char x3 = xx[3];
+    xx[0] = x3;
+    xx[1] = x2;
+    xx[2] = x1;
+    xx[3] = x0;
+}
+
 } // namespace ncnn
 
 #define NCNN_HAVE_ERROR_LOG
@@ -258,6 +282,15 @@ extern char __log_tmp_buf[256];
 #include <math.h>
 #include <fenv.h>
 #endif
+
+#if NCNN_VULKAN
+#if NCNN_SIMPLEVK
+#include "simplevk.h"
+#else
+#include <vulkan/vulkan.h>
+#endif
+#include "vulkan_header_fix.h"
+#endif // NCNN_VULKAN
 
 #endif // __cplusplus
 
