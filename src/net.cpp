@@ -641,15 +641,15 @@ int NetPrivate::convert_layout(Mat& bottom_blob, const Layer* layer, const Optio
         }
         else
 #endif // NCNN_VFPV4
-#if NCNN_RVV
-        if (opt.use_fp16_storage && cpu_support_riscv_v() && cpu_support_riscv_zfh() && layer->support_fp16_storage)
+#if NCNN_ZFH
+        if (opt.use_fp16_storage && (ncnn::cpu_support_riscv_zvfh() || (!ncnn::cpu_support_riscv_v() && ncnn::cpu_support_riscv_zfh())) && layer->support_fp16_storage)
         {
             Mat bottom_blob_fp16;
             cast_float32_to_float16(bottom_blob, bottom_blob_fp16, opt);
             bottom_blob = bottom_blob_fp16;
         }
         else
-#endif // NCNN_RVV
+#endif // NCNN_ZFH
 #if NCNN_BF16
         if (opt.use_bf16_storage && layer->support_bf16_storage)
         {
@@ -697,7 +697,7 @@ int NetPrivate::convert_layout(Mat& bottom_blob, const Layer* layer, const Optio
                     dst_elempack = 8;
                 else if (elemcount % 4 == 0)
                     dst_elempack = 4;
-#elif NCNN_RVV
+#elif NCNN_RVV || NCNN_XTHEADVECTOR
                 const int packn = ncnn::cpu_riscv_vlenb() / 4;
                 if (elemcount % packn == 0)
                     dst_elempack = packn;
@@ -709,11 +709,11 @@ int NetPrivate::convert_layout(Mat& bottom_blob, const Layer* layer, const Optio
             if (elembits == 16)
             {
 #if NCNN_ARM82
-                if (elemcount % 8 == 0 && ncnn::cpu_support_arm_asimdhp() && opt.use_fp16_arithmetic)
+                if (elemcount % 8 == 0 && ncnn::cpu_support_arm_asimdhp() && opt.use_fp16_arithmetic && layer->support_fp16_storage)
                     dst_elempack = 8;
                 else if (elemcount % 4 == 0)
                     dst_elempack = 4;
-#elif NCNN_RVV
+#elif NCNN_RVV || NCNN_XTHEADVECTOR
                 const int packn = ncnn::cpu_riscv_vlenb() / 2;
                 if (elemcount % packn == 0)
                     dst_elempack = packn;
@@ -724,7 +724,7 @@ int NetPrivate::convert_layout(Mat& bottom_blob, const Layer* layer, const Optio
             }
             if (elembits == 8)
             {
-#if NCNN_RVV
+#if NCNN_RVV || NCNN_XTHEADVECTOR
                 const int packn = ncnn::cpu_riscv_vlenb() / 1;
                 if (elemcount % packn == 0)
                     dst_elempack = packn;
@@ -769,15 +769,15 @@ int NetPrivate::convert_layout(Mat& bottom_blob, const Layer* layer, const Optio
         }
         else
 #endif // NCNN_VFPV4
-#if NCNN_RVV
-        if (opt.use_fp16_storage && cpu_support_riscv_v() && cpu_support_riscv_zfh() && !layer->support_fp16_storage)
+#if NCNN_ZFH
+        if (opt.use_fp16_storage && (ncnn::cpu_support_riscv_zvfh() || (!ncnn::cpu_support_riscv_v() && ncnn::cpu_support_riscv_zfh())) && !layer->support_fp16_storage)
         {
             Mat bottom_blob_fp32;
             cast_float16_to_float32(bottom_blob, bottom_blob_fp32, opt);
             bottom_blob = bottom_blob_fp32;
         }
         else
-#endif // NCNN_RVV
+#endif // NCNN_ZFH
 #if NCNN_BF16
         if (opt.use_bf16_storage && !layer->support_bf16_storage)
         {
@@ -2795,8 +2795,8 @@ int Extractor::extract(int blob_index, Mat& feat, int type)
         }
         else
 #endif // NCNN_VFPV4
-#if NCNN_RVV
-        if (d->opt.use_fp16_storage && cpu_support_riscv_v() && cpu_support_riscv_zfh() && (type == 0))
+#if NCNN_ZVFH
+        if (d->opt.use_fp16_storage && cpu_support_riscv_zvfh() && (type == 0))
         {
             if (feat.elembits() == 16)
             {
@@ -2806,7 +2806,7 @@ int Extractor::extract(int blob_index, Mat& feat, int type)
             }
         }
         else
-#endif // NCNN_RVV
+#endif // NCNN_ZVFH
 #if NCNN_BF16
         if (d->opt.use_bf16_storage && (type == 0))
         {
