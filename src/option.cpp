@@ -25,6 +25,10 @@ char __log_tmp_buf[256];
 Option::Option()
 {
     lightmode = true;
+    use_shader_pack8 = false;
+    use_subgroup_ops = false;
+    use_reserved_0 = false;
+
     num_threads = get_physical_big_cpu_count();
     blob_allocator = 0;
     workspace_allocator = 0;
@@ -54,17 +58,13 @@ Option::Option()
 
     use_packing_layout = true;
 
-    use_shader_pack8 = false;
-
-    use_subgroup_basic = false;
-    use_subgroup_vote = false;
-    use_subgroup_ballot = false;
-    use_subgroup_shuffle = false;
+    vulkan_device_index = -1;
+    use_reserved_1 = false;
 
     use_image_storage = false;
     use_tensor_storage = false;
 
-    use_reserved_0 = false;
+    use_reserved_2 = false;
 
     flush_denormals = 3;
 
@@ -81,6 +81,10 @@ Option::Option()
 
     use_fp16_uniform = true;
     use_int8_uniform = true;
+
+    use_reserved_9 = false;
+    use_reserved_10 = false;
+    use_reserved_11 = false;
 }
 
 } // namespace ncnn

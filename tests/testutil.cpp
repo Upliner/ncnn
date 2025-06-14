@@ -726,6 +726,13 @@ int test_layer_gpu(int typeindex, const ncnn::ParamDict& pd, const std::vector<n
     if (!vkdev->info.support_int8_uniform()) opt.use_int8_uniform = false;
     if (!vkdev->info.support_int8_arithmetic()) opt.use_int8_arithmetic = false;
     if (!vkdev->info.support_cooperative_matrix()) opt.use_cooperative_matrix = false;
+    if (!vkdev->info.support_subgroup_ops()) opt.use_subgroup_ops = false;
+
+    if (opt.use_image_storage && !vkdev->info.support_fp16_image())
+    {
+        opt.use_fp16_storage = false;
+        opt.use_fp16_uniform = false;
+    }
 
     // FIXME fp16a may produce large error
     opt.use_fp16_arithmetic = false;
@@ -758,34 +765,6 @@ int test_layer_gpu(int typeindex, const ncnn::ParamDict& pd, const std::vector<n
         // forward
         ncnn::VkCompute cmd(vkdev);
 
-        if (op->support_image_storage && opt.use_image_storage)
-        {
-            // upload
-            std::vector<ncnn::VkImageMat> a_gpu(a.size());
-            for (size_t i = 0; i < a_gpu.size(); i++)
-            {
-                cmd.record_upload(a[i], a_gpu[i], opt);
-            }
-
-            std::vector<ncnn::VkImageMat> d_gpu(top_blob_count);
-            if (op->support_inplace)
-            {
-                op->forward_inplace(a_gpu, cmd, opt);
-
-                d_gpu = a_gpu;
-            }
-            else
-            {
-                op->forward(a_gpu, d_gpu, cmd, opt);
-            }
-
-            // download
-            for (size_t i = 0; i < d_gpu.size(); i++)
-            {
-                cmd.record_download(d_gpu[i], d[i], opt);
-            }
-        }
-        else
         {
             // upload
             std::vector<ncnn::VkMat> a_gpu(a.size());
@@ -1085,6 +1064,13 @@ int test_layer_gpu(int typeindex, const ncnn::ParamDict& pd, const std::vector<n
     if (!vkdev->info.support_int8_uniform()) opt.use_int8_uniform = false;
     if (!vkdev->info.support_int8_arithmetic()) opt.use_int8_arithmetic = false;
     if (!vkdev->info.support_cooperative_matrix()) opt.use_cooperative_matrix = false;
+    if (!vkdev->info.support_subgroup_ops()) opt.use_subgroup_ops = false;
+
+    if (opt.use_image_storage && !vkdev->info.support_fp16_image())
+    {
+        opt.use_fp16_storage = false;
+        opt.use_fp16_uniform = false;
+    }
 
     // FIXME fp16a may produce large error
     opt.use_fp16_arithmetic = false;
@@ -1115,28 +1101,6 @@ int test_layer_gpu(int typeindex, const ncnn::ParamDict& pd, const std::vector<n
         // forward
         ncnn::VkCompute cmd(vkdev);
 
-        if (op->support_image_storage && opt.use_image_storage)
-        {
-            // upload
-            ncnn::VkImageMat a_gpu;
-            cmd.record_upload(a, a_gpu, opt);
-
-            ncnn::VkImageMat d_gpu;
-            if (op->support_inplace)
-            {
-                op->forward_inplace(a_gpu, cmd, opt);
-
-                d_gpu = a_gpu;
-            }
-            else
-            {
-                op->forward(a_gpu, d_gpu, cmd, opt);
-            }
-
-            // download
-            cmd.record_download(d_gpu, d, opt);
-        }
-        else
         {
             // upload
             ncnn::VkMat a_gpu;
