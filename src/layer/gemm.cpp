@@ -47,6 +47,7 @@ int Gemm::load_param(const ParamDict& pd)
     if (int8_scale_term)
     {
 #if !NCNN_INT8
+        g_error = true;
         NCNN_LOGE("please build ncnn with NCNN_INT8 enabled for int8 inference");
         return -1;
 #endif
@@ -54,18 +55,21 @@ int Gemm::load_param(const ParamDict& pd)
 
     if (constantA == 1 && (constantM == 0 || constantK == 0))
     {
+        g_error = true;
         NCNN_LOGE("constantM and constantK must be non-zero when constantA enabled");
         return -1;
     }
 
     if (constantB == 1 && (constantN == 0 || constantK == 0))
     {
+        g_error = true;
         NCNN_LOGE("constantN and constantK must be non-zero when constantB enabled");
         return -1;
     }
 
     if (constantC == 1 && (constant_broadcast_type_C < -1 || constant_broadcast_type_C > 4))
     {
+        g_error = true;
         NCNN_LOGE("constant_broadcast_type_C must be -1 or 0~4 when constantC enabled");
         return -1;
     }

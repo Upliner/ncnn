@@ -38,6 +38,7 @@ int Reduction::load_param(const ParamDict& pd)
     int fixbug0 = pd.get(5, 0);
     if (fixbug0 == 0 && !axes.empty())
     {
+        g_error = true;
         NCNN_LOGE("param is too old, please regenerate!");
         return -1;
     }

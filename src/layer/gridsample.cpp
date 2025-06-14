@@ -31,12 +31,14 @@ int GridSample::load_param(const ParamDict& pd)
 
     if (sample_type < 1 || sample_type > 3)
     {
+        g_error = true;
         NCNN_LOGE("unsupported sample type %d", sample_type);
         return -1;
     }
 
     if (padding_mode < 1 || padding_mode > 3)
     {
+        g_error = true;
         NCNN_LOGE("unsupported padding mode %d", padding_mode);
         return -1;
     }
@@ -570,6 +572,7 @@ int GridSample::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& 
         }
         else if (sample_type == 3)
         {
+            g_error = true;
             NCNN_LOGE("unsupported bicubic when dims == 4");
             return -1;
         }

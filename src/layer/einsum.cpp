@@ -53,6 +53,7 @@ int Einsum::load_param(const ParamDict& pd)
     char* arrow = strstr(equation_ptr, "->");
     if (!arrow)
     {
+        g_error = true;
         NCNN_LOGE("invalid equation %s", equation_ptr);
         return -1;
     }
@@ -80,6 +81,7 @@ int Einsum::load_param(const ParamDict& pd)
         {
             if (rhs_token[i] < 'i' || rhs_token[i] > 'l')
             {
+                g_error = true;
                 NCNN_LOGE("invalid rhs_token %s", rhs_token.c_str());
                 return -1;
             }
@@ -92,6 +94,7 @@ int Einsum::load_param(const ParamDict& pd)
             {
                 if (lhs_token[j] < 'i' || lhs_token[j] > 'x')
                 {
+                    g_error = true;
                     NCNN_LOGE("invalid lhs_token %s", lhs_token.c_str());
                     return -1;
                 }

@@ -32,6 +32,7 @@ int GRU::load_param(const ParamDict& pd)
     if (int8_scale_term)
     {
 #if !NCNN_INT8
+        g_error = true;
         NCNN_LOGE("please build ncnn with NCNN_INT8 enabled for int8 inference");
         return -1;
 #endif

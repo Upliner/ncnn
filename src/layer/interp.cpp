@@ -36,6 +36,7 @@ int Interp::load_param(const ParamDict& pd)
 
     if (resize_type < 0 || resize_type > 3)
     {
+        g_error = true;
         NCNN_LOGE("unsupported resize type %d", resize_type);
         return -1;
     }

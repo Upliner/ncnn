@@ -350,6 +350,7 @@ int ParamDict::load_param(const DataReader& dr)
         int nscan = dr.scan("%15[^,\n ]", vstr);
         if (nscan != 1)
         {
+            g_error = true;
             NCNN_LOGE("ParamDict read value failed");
             return -1;
         }
@@ -372,6 +373,7 @@ int ParamDict::load_param(const DataReader& dr)
             {
                 if (vstr2[241] != '\0')
                 {
+                    g_error = true;
                     NCNN_LOGE("string too long (id=%d)", id);
                     return -1;
                 }
@@ -417,6 +419,7 @@ int ParamDict::load_param(const DataReader& dr)
                 nscan = sscanf(vstr, "%d", &v);
                 if (nscan != 1)
                 {
+                    g_error = true;
                     NCNN_LOGE("ParamDict parse value failed");
                     return -1;
                 }
@@ -442,6 +445,7 @@ int ParamDict::load_param(const DataReader& dr)
                     nscan = sscanf(vstr, "%d", &v);
                     if (nscan != 1)
                     {
+                        g_error = true;
                         NCNN_LOGE("ParamDict parse value failed");
                         return -1;
                     }
@@ -551,6 +555,7 @@ int ParamDict::load_param_bin(const DataReader& dr)
             nread = dr.read(&len, sizeof(int));
             if (nread != sizeof(int))
             {
+                g_error = true;
                 NCNN_LOGE("ParamDict read array length failed %zd", nread);
                 return -1;
             }
@@ -561,6 +566,7 @@ int ParamDict::load_param_bin(const DataReader& dr)
 
             if (len > 255)
             {
+                g_error = true;
                 NCNN_LOGE("string too long (id=%d)", id);
                 return -1;
             }
@@ -572,6 +578,7 @@ int ParamDict::load_param_bin(const DataReader& dr)
             nread = dr.read(ptr, len_padded);
             if (nread != len_padded)
             {
+                g_error = true;
                 NCNN_LOGE("ParamDict read string failed %zd", nread);
                 return -1;
             }

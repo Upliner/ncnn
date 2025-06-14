@@ -670,6 +670,7 @@ int GpuInfoPrivate::query_extensions()
     VkResult ret = vkEnumerateDeviceExtensionProperties(physicalDevice, NULL, &deviceExtensionPropertyCount, NULL);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEnumerateDeviceExtensionProperties failed %d", ret);
         return -1;
     }
@@ -678,6 +679,7 @@ int GpuInfoPrivate::query_extensions()
     ret = vkEnumerateDeviceExtensionProperties(physicalDevice, NULL, &deviceExtensionPropertyCount, deviceExtensionProperties.data());
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkEnumerateDeviceExtensionProperties failed %d", ret);
         return -1;
     }
@@ -1178,6 +1180,7 @@ void GpuInfoPrivate::query_extension_properties()
         VkResult ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physicalDevice, &propertyCount, 0);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR failed %d", ret);
         }
 
@@ -1191,6 +1194,7 @@ void GpuInfoPrivate::query_extension_properties()
         ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physicalDevice, &propertyCount, queryCooperativeMatrixSubProperties.data());
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR failed %d", ret);
         }
 
@@ -1235,6 +1239,7 @@ void GpuInfoPrivate::query_extension_properties()
         VkResult ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(physicalDevice, &propertyCount, 0);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesNV failed %d", ret);
         }
 
@@ -1248,6 +1253,7 @@ void GpuInfoPrivate::query_extension_properties()
         ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(physicalDevice, &propertyCount, queryCooperativeMatrixSubPropertiesNV.data());
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesNV failed %d", ret);
         }
 
@@ -1295,6 +1301,7 @@ void GpuInfoPrivate::query_extension_properties()
         VkResult ret = vkGetPhysicalDeviceCooperativeMatrixFlexibleDimensionsPropertiesNV(physicalDevice, &propertyCount, 0);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixFlexibleDimensionsPropertiesNV failed %d", ret);
         }
 
@@ -1308,6 +1315,7 @@ void GpuInfoPrivate::query_extension_properties()
         ret = vkGetPhysicalDeviceCooperativeMatrixFlexibleDimensionsPropertiesNV(physicalDevice, &propertyCount, queryCooperativeMatrixFlexibleDimensionsSubPropertiesNV.data());
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixFlexibleDimensionsPropertiesNV failed %d", ret);
         }
 
@@ -1326,6 +1334,7 @@ void GpuInfoPrivate::query_extension_properties()
         VkResult ret = vkGetPhysicalDeviceCooperativeVectorPropertiesNV(physicalDevice, &propertyCount, 0);
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeVectorPropertiesNV failed %d", ret);
         }
 
@@ -1339,6 +1348,7 @@ void GpuInfoPrivate::query_extension_properties()
         ret = vkGetPhysicalDeviceCooperativeVectorPropertiesNV(physicalDevice, &propertyCount, queryCooperativeVectorSubPropertiesNV.data());
         if (ret != VK_SUCCESS)
         {
+            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeVectorPropertiesNV failed %d", ret);
         }
 
@@ -5674,6 +5684,7 @@ int compile_spirv_module(const char* comp_data, int comp_data_size, const Option
 
             if (version_end_pos == -1)
             {
+                g_error = true;
                 NCNN_LOGE("shader source has no #version token");
                 return -1;
             }

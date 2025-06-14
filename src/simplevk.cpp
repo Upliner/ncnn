@@ -264,6 +264,7 @@ static int load_vulkan_windows(const char* driver_path)
     HMODULE libvulkan = LoadLibraryA(libpath);
     if (!libvulkan)
     {
+        g_error = true;
         NCNN_LOGE("LoadLibraryA %s failed %d", libpath, GetLastError());
         return -1;
     }
@@ -282,6 +283,7 @@ static int load_vulkan_windows(const char* driver_path)
             VkResult ret = icdNegotiateLoaderICDInterfaceVersion(&supported_version);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("icdNegotiateLoaderICDInterfaceVersion failed");
                 FreeLibrary(libvulkan);
                 return -1;
@@ -293,6 +295,7 @@ static int load_vulkan_windows(const char* driver_path)
         GetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)GetProcAddress(libvulkan, "vkGetInstanceProcAddr");
         if (!GetInstanceProcAddr)
         {
+            g_error = true;
             NCNN_LOGE("GetProcAddress failed %d", GetLastError());
             FreeLibrary(libvulkan);
             return -1;
@@ -324,6 +327,7 @@ static int load_vulkan_linux(const char* driver_path)
 #endif
     if (!libvulkan)
     {
+        g_error = true;
         NCNN_LOGE("dlopen failed %s", dlerror());
         return -1;
     }
@@ -342,6 +346,7 @@ static int load_vulkan_linux(const char* driver_path)
             VkResult ret = icdNegotiateLoaderICDInterfaceVersion(&supported_version);
             if (ret != VK_SUCCESS)
             {
+                g_error = true;
                 NCNN_LOGE("icdNegotiateLoaderICDInterfaceVersion failed");
                 dlclose(libvulkan);
                 return -1;
@@ -353,6 +358,7 @@ static int load_vulkan_linux(const char* driver_path)
         GetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)dlsym(libvulkan, "vkGetInstanceProcAddr");
         if (!GetInstanceProcAddr)
         {
+            g_error = true;
             NCNN_LOGE("dlsym failed %s", dlerror());
             dlclose(libvulkan);
             return -1;
@@ -409,6 +415,7 @@ static int load_vulkan_android(const char* driver_path)
 
         if (!hal_driver_found)
         {
+            g_error = true;
             NCNN_LOGE("no hal driver found");
             return -1;
         }
@@ -421,6 +428,7 @@ static int load_vulkan_android(const char* driver_path)
     void* libvulkan = dlopen(libpath, RTLD_LOCAL | RTLD_NOW);
     if (!libvulkan)
     {
+        g_error = true;
         NCNN_LOGE("dlopen failed %s", dlerror());
         return -1;
     }
@@ -430,6 +438,7 @@ static int load_vulkan_android(const char* driver_path)
     hmi = (hw_module_t*)dlsym(libvulkan, "HMI");
     if (!hmi)
     {
+        g_error = true;
         NCNN_LOGE("dlsym failed %s", dlerror());
         dlclose(libvulkan);
         return -1;
@@ -437,6 +446,7 @@ static int load_vulkan_android(const char* driver_path)
 
     if (strcmp(hmi->id, "vulkan") != 0)
     {
+        g_error = true;
         NCNN_LOGE("hmi->id != vulkan");
         dlclose(libvulkan);
         return -1;
@@ -451,6 +461,7 @@ static int load_vulkan_android(const char* driver_path)
     int result = hvkmi->methods->open(hvkmi, "vk0", (hw_device_t**)&hvkdi);
     if (result != 0)
     {
+        g_error = true;
         NCNN_LOGE("hmi->open failed %d", result);
         dlclose(libvulkan);
         return -1;

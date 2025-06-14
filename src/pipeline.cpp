@@ -410,6 +410,7 @@ int ImportAndroidHardwareBufferPipeline::create(VkAndroidHardwareBufferImageAllo
 
     if ((int)specializations.size() != _shader_info.specialization_count)
     {
+        g_error = true;
         NCNN_LOGE("pipeline convert_ycbcr specialization count mismatch, expect %d but got %d", _shader_info.specialization_count, (int)specializations.size());
         return -1;
     }
@@ -455,6 +456,7 @@ int ImportAndroidHardwareBufferPipeline::create_shader_module(const Option& opt)
     int retc = compile_spirv_module(shader_type_index, opt, spirv);
     if (retc != 0)
     {
+        g_error = true;
         NCNN_LOGE("compile_spirv_module failed %d", retc);
         return -1;
     }
@@ -466,6 +468,7 @@ int ImportAndroidHardwareBufferPipeline::create_shader_module(const Option& opt)
     int ret = resolve_shader_info(spv_data, spv_data_size, shader_info);
     if (ret != 0)
     {
+        g_error = true;
         NCNN_LOGE("resolve_shader_info failed %d", ret);
         return -1;
     }
@@ -514,6 +517,7 @@ int ImportAndroidHardwareBufferPipeline::create_sampler(VkAndroidHardwareBufferI
     ret = vkCreateSampler(vkdev->vkdevice(), &samplerCreateInfo, 0, &sampler);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateSampler failed %d", ret);
         return -1;
     }
@@ -556,6 +560,7 @@ int ImportAndroidHardwareBufferPipeline::create_descriptorset_layout()
     VkResult ret = vkCreateDescriptorSetLayout(vkdev->vkdevice(), &descriptorSetLayoutCreateInfo, 0, &descriptorset_layout);
     if (ret != VK_SUCCESS)
     {
+        g_error = true;
         NCNN_LOGE("vkCreateDescriptorSetLayout failed %d", ret);
         return -1;
     }

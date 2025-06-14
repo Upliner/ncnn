@@ -37,6 +37,7 @@ int ShuffleChannel_x86::forward(const Mat& bottom_blob, Mat& top_blob, const Opt
     int elembits = bottom_blob.elembits();
     if (elembits != 32)
     {
+        g_error = true;
         NCNN_LOGE("Elembits = %d is not implemented yet.", elembits);
         return -100;
     }
