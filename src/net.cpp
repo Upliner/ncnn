@@ -1385,7 +1385,14 @@ int Net::load_param(const DataReader& dr)
 
     if (opt.use_vulkan_compute)
     {
-        if (!d->vkdev) d->vkdev = get_gpu_device();
+        if (!d->vkdev)
+        {
+            int device_index = opt.vulkan_device_index;
+            if (device_index < 0 || device_index >= get_gpu_count())
+                device_index = get_default_gpu_index();
+
+            d->vkdev = get_gpu_device(device_index);
+        }
         if (!d->vkdev || !d->vkdev->is_valid()) opt.use_vulkan_compute = false; // no valid vulkan device, fallback to cpu
     }
     if (opt.use_vulkan_compute)
@@ -1400,8 +1407,15 @@ int Net::load_param(const DataReader& dr)
         if (!d->vkdev->info.support_int8_uniform()) opt.use_int8_uniform = false;
         if (!d->vkdev->info.support_int8_arithmetic()) opt.use_int8_arithmetic = false;
         if (!d->vkdev->info.support_cooperative_matrix()) opt.use_cooperative_matrix = false;
+        if (!d->vkdev->info.support_subgroup_ops()) opt.use_subgroup_ops = false;
 
         if (d->vkdev->info.bug_buffer_image_load_zero()) opt.use_image_storage = false;
+
+        if (opt.use_image_storage && !d->vkdev->info.support_fp16_image())
+        {
+            opt.use_fp16_storage = false;
+            opt.use_fp16_uniform = false;
+        }
 
         // enable local memory optimization on discrete gpu only
         if (d->vkdev->info.type() != 0) opt.use_shader_local_memory = false;
@@ -1690,7 +1704,14 @@ int Net::load_param_bin(const DataReader& dr)
 
     if (opt.use_vulkan_compute)
     {
-        if (!d->vkdev) d->vkdev = get_gpu_device();
+        if (!d->vkdev)
+        {
+            int device_index = opt.vulkan_device_index;
+            if (device_index < 0 || device_index >= get_gpu_count())
+                device_index = get_default_gpu_index();
+
+            d->vkdev = get_gpu_device(device_index);
+        }
         if (!d->vkdev || !d->vkdev->is_valid()) opt.use_vulkan_compute = false; // no valid vulkan device, fallback to cpu
     }
     if (opt.use_vulkan_compute)
@@ -1705,8 +1726,15 @@ int Net::load_param_bin(const DataReader& dr)
         if (!d->vkdev->info.support_int8_uniform()) opt.use_int8_uniform = false;
         if (!d->vkdev->info.support_int8_arithmetic()) opt.use_int8_arithmetic = false;
         if (!d->vkdev->info.support_cooperative_matrix()) opt.use_cooperative_matrix = false;
+        if (!d->vkdev->info.support_subgroup_ops()) opt.use_subgroup_ops = false;
 
         if (d->vkdev->info.bug_buffer_image_load_zero()) opt.use_image_storage = false;
+
+        if (opt.use_image_storage && !d->vkdev->info.support_fp16_image())
+        {
+            opt.use_fp16_storage = false;
+            opt.use_fp16_uniform = false;
+        }
 
         // enable local memory optimization on discrete gpu only
         if (d->vkdev->info.type() != 0) opt.use_shader_local_memory = false;
@@ -2321,11 +2349,13 @@ std::vector<Layer*>& Net::mutable_layers()
 #if NCNN_VULKAN
 void Net::set_vulkan_device(int device_index)
 {
+    opt.vulkan_device_index = device_index;
     d->vkdev = get_gpu_device(device_index);
 }
 
 void Net::set_vulkan_device(const VulkanDevice* _vkdev)
 {
+    opt.vulkan_device_index = _vkdev->info.device_index();
     d->vkdev = _vkdev;
 }
 
@@ -2533,10 +2563,12 @@ void Extractor::clear()
         if (d->local_blob_vkallocator)
         {
             d->net->vulkan_device()->reclaim_blob_allocator(d->local_blob_vkallocator);
+            d->local_blob_vkallocator = 0;
         }
         if (d->local_staging_vkallocator)
         {
             d->net->vulkan_device()->reclaim_staging_allocator(d->local_staging_vkallocator);
+            d->local_staging_vkallocator = 0;
         }
     }
 #endif // NCNN_VULKAN

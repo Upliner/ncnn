@@ -22,6 +22,7 @@ set(ncnn_SRCS
     command.cpp
     cpu.cpp
     datareader.cpp
+    expression.cpp
     gpu.cpp
     layer.cpp
     mat.cpp
@@ -245,8 +246,6 @@ if(NCNN_OPENMP)
         elseif(ANDROID_NDK_MAJOR AND (ANDROID_NDK_MAJOR GREATER 20))
             target_compile_options(ncnn PRIVATE -fopenmp)
             target_link_libraries(ncnn PUBLIC -fopenmp -static-openmp)
-            # see cpu.cpp __wrap___kmp_abort_process comment for the linker magic
-            target_link_libraries(ncnn PUBLIC -Wl,-wrap,__kmp_affinity_determine_capable)
         elseif(OpenMP_CXX_FOUND)
             target_link_libraries(ncnn PUBLIC OpenMP::OpenMP_CXX)
         else()
@@ -731,6 +730,7 @@ if(NCNN_INSTALL_SDK)
         command.h
         cpu.h
         datareader.h
+        expression.h
         gpu.h
         layer.h
         layer_shader_type.h
