@@ -2001,7 +2001,7 @@ int create_gpu_instance(const char* driver_path)
     {
         g_error = true;
         NCNN_LOGE("vkEnumerateInstanceLayerProperties failed %d", ret);
-    g_error = true;
+        g_error = true;
         return -1;
     }
 
