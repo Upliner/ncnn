@@ -162,6 +162,7 @@ int eval_list_expression(const std::string& expr, const std::vector<Mat>& blobs,
             size_t blob_index = t[0] - '0';
             if (blob_index >= blobs.size())
             {
+                g_error = true;
                 NCNN_LOGE("shape expression blob index %d out of bound!", (int)blob_index);
                 return -1;
             }
@@ -210,6 +211,7 @@ int eval_list_expression(const std::string& expr, const std::vector<Mat>& blobs,
                 {
                     if (b == 0)
                     {
+                        g_error = true;
                         NCNN_LOGE("expr divide by zero");
                         return -1;
                     }
@@ -547,6 +549,7 @@ int eval_list_expression(const std::string& expr, const std::vector<Mat>& blobs,
             }
             else
             {
+                g_error = true;
                 NCNN_LOGE("malformed literal token %s", t.c_str());
                 return -1;
             }

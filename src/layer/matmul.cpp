@@ -391,6 +391,7 @@ int MatMul::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& top_
     }
     else
     {
+        g_error = true;
         NCNN_LOGE("impossible matmul %d %d", Adims, Bdims);
         return -1;
     }

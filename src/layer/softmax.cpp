@@ -33,6 +33,7 @@ int Softmax::load_param(const ParamDict& pd)
     int fixbug0 = pd.get(1, 0);
     if (fixbug0 == 0 && axis != 0)
     {
+        g_error = true;
         NCNN_LOGE("param is too old, please regenerate!");
         return -1;
     }

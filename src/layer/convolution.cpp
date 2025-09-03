@@ -58,6 +58,7 @@ int Convolution::load_param(const ParamDict& pd)
 #if NCNN_INT8
         support_int8_storage = true;
 #else
+        g_error = true;
         NCNN_LOGE("please build ncnn with NCNN_INT8 enabled for int8 inference");
         return -1;
 #endif

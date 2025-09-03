@@ -224,6 +224,7 @@ int MatMul_x86::forward(const std::vector<Mat>& bottom_blobs, std::vector<Mat>& 
     }
     else
     {
+        g_error = true;
         NCNN_LOGE("impossible matmul %d %d", Adims, Bdims);
         return -1;
     }

@@ -53,6 +53,7 @@ int Einsum::load_param(const ParamDict& pd)
     char* arrow = strstr(equation_ptr, "->");
     if (!arrow)
     {
+        g_error = true;
         NCNN_LOGE("invalid equation %s", equation_ptr);
         return -1;
     }

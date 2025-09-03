@@ -116,6 +116,7 @@ int GridSample_x86::forward(const std::vector<Mat>& bottom_blobs, std::vector<Ma
             }
             else
             {
+                g_error = true;
                 NCNN_LOGE("gridsample padding_mode error\n");
                 return -100;
             }
