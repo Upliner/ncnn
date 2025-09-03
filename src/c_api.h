@@ -323,8 +323,6 @@ typedef struct __ncnn_extractor_t* ncnn_extractor_t;
 NCNN_EXPORT ncnn_extractor_t ncnn_extractor_create(ncnn_net_t net);
 NCNN_EXPORT void ncnn_extractor_destroy(ncnn_extractor_t ex);
 
-NCNN_EXPORT void ncnn_extractor_set_option(ncnn_extractor_t ex, const ncnn_option_t opt);
-
 #if NCNN_STRING
 NCNN_EXPORT int ncnn_extractor_input(ncnn_extractor_t ex, const char* name, const ncnn_mat_t mat);
 NCNN_EXPORT int ncnn_extractor_extract(ncnn_extractor_t ex, const char* name, ncnn_mat_t* mat);
