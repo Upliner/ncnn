@@ -1034,6 +1034,11 @@ void GpuInfoPrivate::query_extension_properties()
         }
 
         std::vector<VkCooperativeMatrixPropertiesKHR> properties(propertyCount);
+        for (uint32_t j = 0; j < properties.size(); j++)
+        {
+            properties[j].sType = VK_STRUCTURE_TYPE_COOPERATIVE_MATRIX_PROPERTIES_KHR;
+            properties[j].pNext = 0;
+        }
         ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physicalDevice, &propertyCount, properties.data());
         if (ret != VK_SUCCESS)
         {
