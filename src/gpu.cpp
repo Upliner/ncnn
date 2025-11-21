@@ -1156,7 +1156,6 @@ void GpuInfoPrivate::query_extension_properties()
         VkResult ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physicalDevice, &propertyCount, 0);
         if (ret != VK_SUCCESS)
         {
-            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR failed %d", ret);
         }
 
@@ -1170,7 +1169,6 @@ void GpuInfoPrivate::query_extension_properties()
         ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physicalDevice, &propertyCount, queryCooperativeMatrixSubProperties.data());
         if (ret != VK_SUCCESS)
         {
-            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR failed %d", ret);
         }
 
@@ -1215,7 +1213,6 @@ void GpuInfoPrivate::query_extension_properties()
         VkResult ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(physicalDevice, &propertyCount, 0);
         if (ret != VK_SUCCESS)
         {
-            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesNV failed %d", ret);
         }
 
@@ -1229,7 +1226,6 @@ void GpuInfoPrivate::query_extension_properties()
         ret = vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(physicalDevice, &propertyCount, queryCooperativeMatrixSubPropertiesNV.data());
         if (ret != VK_SUCCESS)
         {
-            g_error = true;
             NCNN_LOGE("vkGetPhysicalDeviceCooperativeMatrixPropertiesNV failed %d", ret);
         }
 
@@ -2412,7 +2408,6 @@ int create_gpu_instance(const char* driver_path)
     {
         g_error = true;
         NCNN_LOGE("vkEnumerateInstanceLayerProperties failed %d", ret);
-        g_error = true;
         return -1;
     }
 
@@ -4332,11 +4327,13 @@ void VulkanDevice::convert_packing(const VkMat& src, VkMat& dst, int dst_elempac
 
     if ((cast_type_from_index == 0 || cast_type_from_index == 1) && (cast_type_to_index == 2 || cast_type_to_index == 3))
     {
+        g_error = true;
         NCNN_LOGE("convert_packing from fp32/fp16 to int32/int8 is not supported");
         return;
     }
     if ((cast_type_from_index == 2 || cast_type_from_index == 3) && (cast_type_to_index == 0 || cast_type_to_index == 1))
     {
+        g_error = true;
         NCNN_LOGE("convert_packing from int32/int8 to fp32/fp16 is not supported");
         return;
     }
