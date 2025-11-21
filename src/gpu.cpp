@@ -1137,7 +1137,10 @@ void GpuInfoPrivate::query_extension_properties()
     {
         querySubgroupSizeControlProperties.minSubgroupSize = querySubgroupProperties.subgroupSize;
         querySubgroupSizeControlProperties.maxSubgroupSize = querySubgroupProperties.subgroupSize;
-        querySubgroupSizeControlProperties.maxComputeWorkgroupSubgroups = std::max(physicalDeviceProperties.limits.maxComputeWorkGroupInvocations / querySubgroupProperties.subgroupSize, 1u);
+        if (querySubgroupProperties.subgroupSize > 0)
+            querySubgroupSizeControlProperties.maxComputeWorkgroupSubgroups = std::max(physicalDeviceProperties.limits.maxComputeWorkGroupInvocations / querySubgroupProperties.subgroupSize, 1u);
+        else
+            querySubgroupSizeControlProperties.maxComputeWorkgroupSubgroups = std::max(physicalDeviceProperties.limits.maxComputeWorkGroupInvocations, 1u);
     }
 
     // query supported cooperative matrix types and operations
