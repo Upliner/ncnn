@@ -323,7 +323,7 @@ int ModelWriter::shape_inference()
         int cret = layer->create_pipeline(opt);
         if (cret != 0)
         {
-            NCNN_LOGE("layer create_pipeline %d %s failed", (int)i, layer->name.c_str());
+            fprintf(stderr, "layer create_pipeline %d %s failed", (int)i, layer->name.c_str());
             return -1;
         }
     }
