@@ -1761,6 +1761,7 @@ int Net::load_param(const wchar_t* protopath)
     FILE* fp = _wfopen(protopath, L"rb");
     if (!fp)
     {
+        g_error = true;
         NCNN_LOGE("_wfopen %ls failed", protopath);
         return -1;
     }
@@ -1799,6 +1800,7 @@ int Net::load_param_bin(const wchar_t* protopath)
     FILE* fp = _wfopen(protopath, L"rb");
     if (!fp)
     {
+        g_error = true;
         NCNN_LOGE("_wfopen %ls failed", protopath);
         return -1;
     }
@@ -1836,6 +1838,7 @@ int Net::load_model(const wchar_t* modelpath)
     FILE* fp = _wfopen(modelpath, L"rb");
     if (!fp)
     {
+        g_error = true;
         NCNN_LOGE("_wfopen %ls failed", modelpath);
         return -1;
     }
